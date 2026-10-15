@@ -13,7 +13,7 @@ namespace AgDns {
   public bool Allowed;public string Code;public string Detail;public double Seconds;
  }
 
- // 1.4-1 (offline part): never start a mutation while the Windows CIM/WMI layer does not answer, and never leave an unfinished restore without telling
+ // never start a mutation while the Windows CIM/WMI layer does not answer, and never leave an unfinished restore without telling
  // the user exactly what is still there. Nothing in this file writes to the registry or calls a CIM cmdlet: the manual instruction is text only.
  public static class Recovery {
   public const string WmiNotResponding="WMI_NOT_RESPONDING";

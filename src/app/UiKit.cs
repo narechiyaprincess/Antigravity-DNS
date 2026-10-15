@@ -28,9 +28,9 @@ namespace AgDns {
   public string CustomServers="";
   public string CustomTemplate="";
   public int WinX=int.MinValue,WinY=int.MinValue;   // last window position (screen pixels); restored only if it is still on a screen
-  // Where the addresses of the last successful connect came from (1.4-2): "pinned" or "found" (bootstrap) at LastAddrTime (UTC, round-trip format).
+  // Where the addresses of the last successful connect came from: "pinned" or "found" (bootstrap) at LastAddrTime (UTC, round-trip format).
   public string LastAddrSource="",LastAddrTime="",LastAddrServers="",LastAddrTemplate="";
-  // 1.6-1: up to four addresses per profile that an earlier bootstrap found, with the date; tried after the pins and before a new bootstrap.
+  // up to four addresses per profile that an earlier bootstrap found, with the date; tried after the pins and before a new bootstrap.
   public List<SavedAddr> SavedAddrs=new List<SavedAddr>();
   static string FilePath=>Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AntigravityDnsUnlocker","settings.json");
   public static AppSettings Load(){
@@ -134,12 +134,12 @@ namespace AgDns {
    float k=px<=20?1.75f:px<40?1.5f:px<72?1.18f:1f;   // thin strokes thicken as the icon shrinks
    // The planet grows less than the strokes, and below 40 px the apex of the mark moves down a little, so the two never melt into one blob.
    float kd=px<=24?1.2f:px<40?1.2f:px<72?1.1f:1f,apex=px<=24?.38f:px<40?.34f:.31f;
-   // Tile: deep navy glass, lighter at the top, a hairline rim that catches the light along the upper edge.
+   // Tile background gradient and upper border.
    var tile=new RectangleF(x+s*.03f,y+s*.03f,s*.94f,s*.94f);float rad=s*.25f;
    using(var tilePath=Theme.Round(tile,rad)){
     using(var br=new LinearGradientBrush(tile,Color.FromArgb(36,41,66),Color.FromArgb(8,9,15),LinearGradientMode.Vertical))g.FillPath(br,tilePath);
     var clip=g.Clip;g.SetClip(tilePath,CombineMode.Intersect);
-    // A cool light from the upper left and, when the bridge is on, a blue glow behind the mark.
+    // Upper-left highlight; blue glow when the bridge is active.
     using(var sheen=new GraphicsPath()){sheen.AddEllipse(x-s*.25f,y-s*.45f,s*1.1f,s*.95f);using(var pb=new PathGradientBrush(sheen){CenterColor=Color.FromArgb(28,150,170,255),SurroundColors=new[]{Color.FromArgb(0,150,170,255)}})g.FillPath(pb,sheen);}
     if(act>0)using(var glow=new GraphicsPath()){glow.AddEllipse(x+s*.12f,y+s*.22f,s*.76f,s*.66f);using(var pb=new PathGradientBrush(glow){CenterColor=Color.FromArgb((int)(78*act),64,128,255),SurroundColors=new[]{Color.FromArgb(0,64,128,255)}})g.FillPath(pb,glow);}
     g.Clip=clip;
@@ -167,7 +167,7 @@ namespace AgDns {
    using(var gb=new LinearGradientBrush(orbitRect,Color.FromArgb(tiny?230:150,blue),Color.FromArgb(tiny?230:150,orange),0f))using(var pen=new Pen(gb,ow*(tiny?1f:.85f)))g.DrawArc(pen,orbitRect,170,200);
    g.Restore(state);
    if(behind)Satellite();
-   // The mark: an "A" without its bar. A soft shadow lifts it off the ring, the stroke itself runs from white to a cool blue.
+   // A-shaped mark with shadow and a white-to-blue stroke.
    var chev=new[]{new PointF(x+s*.29f,y+s*.70f),new PointF(x+s*.5f,y+s*apex),new PointF(x+s*.71f,y+s*.70f)};
    float cw=s*.095f*k;
    if(!tiny){
@@ -181,7 +181,7 @@ namespace AgDns {
    using(var gb=new LinearGradientBrush(orbitRect,blue,orange,0f))using(var pen=new Pen(gb,ow){StartCap=LineCap.Round,EndCap=LineCap.Round})g.DrawArc(pen,orbitRect,4,166);
    g.Restore(state);
    if(spinning&&!behind)Satellite();
-   // The planet: a lit sphere (highlight upper left) with a warm halo while the bridge is on.
+   // Sphere with an upper-left highlight and an active-state halo.
    float r0=s*.058f*kd;float cx=x+s*.5f,cy=y+s*(px<=24?.16f:px<40?.18f:.19f);
    int dotAlpha=spinning?110:255;
    if(act>0&&!spinning&&!tiny)using(var halo=new GraphicsPath()){halo.AddEllipse(cx-r0*2.3f,cy-r0*2.3f,r0*4.6f,r0*4.6f);using(var pb=new PathGradientBrush(halo){CenterColor=Color.FromArgb((int)((px<48?70:120)*act),orange),SurroundColors=new[]{Color.FromArgb(0,orange)}})g.FillPath(pb,halo);}

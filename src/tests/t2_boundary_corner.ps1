@@ -41,14 +41,14 @@ $trailing = (Join-Path $ScratchPath 'trailing') + '\'
 $normalized = [System.IO.Path]::GetFullPath($trailing).TrimEnd('\', '/')
 Assert-Condition (-not $normalized.EndsWith('\')) 'T2_F01_B03' 'Staging path with trailing backslash normalized correctly' 'F01'
 
-# T2_F01_B04: Scratch staging isolation: baseline portable folder untouched
-$portableExe = Join-Path $portableRoot 'AntigravityDnsUnlocker.exe'
-$hashBefore = (Get-FileHash $portableExe -Algorithm SHA256).Hash
+# T2_F01_B04: Scratch staging leaves all historical script fixtures untouched.
+$baselineFiles = @('Engine.ps1','Integration.ps1','EmergencyRestore.ps1' | ForEach-Object { Join-Path $portableRoot $_ })
+$hashBefore = @($baselineFiles | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }) -join ','
 # Simulate scratch activity
 $tempFile = Join-Path $ScratchPath 'temp_artifact.tmp'
 Set-Content $tempFile 'build data'
-$hashAfter = (Get-FileHash $portableExe -Algorithm SHA256).Hash
-Assert-EqualValues $hashAfter $hashBefore 'T2_F01_B04' 'Scratch operations leave baseline portable binary hash unaltered' 'F01'
+$hashAfter = @($baselineFiles | ForEach-Object { (Get-FileHash -LiteralPath $_ -Algorithm SHA256).Hash }) -join ','
+Assert-EqualValues $hashAfter $hashBefore 'T2_F01_B04' 'Scratch operations preserve historical script fixture hashes' 'F01'
 
 # T2_F01_B05: Portable folder contains no leftover test artifacts
 $portableItems = @(Get-ChildItem $portableRoot -Filter '*.tmp')

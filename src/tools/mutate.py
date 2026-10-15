@@ -11,7 +11,7 @@ def run(m):
     shutil.rmtree(d, ignore_errors=True); os.makedirs(d)
     tier = m.get('tier', '8')
     shutil.copytree(os.path.join(root, 'app'), os.path.join(d, 'app'))
-    # the 1.1.0 baseline (113 MB) is read only by tiers 1-4
+    # Historical script fixtures are used by tiers 1-4.
     big = tier in ('1', '2', '3', '4', 'All')
     shutil.copytree(os.path.join(root, 'tests'), os.path.join(d, 'tests'), ignore=None if big else shutil.ignore_patterns('baseline-1.1.0'))
     edits = m.get('edits') or [m]

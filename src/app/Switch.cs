@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace AgDns {
- // 1.6-3: the current provider has no usable address. The program looks for another catalog profile that works on this network and OFFERS it.
+ // the current provider has no usable address. The program looks for another catalog profile that works on this network and OFFERS it.
  // Nothing is switched silently: the offer becomes a connection only through the trust dialog and the ordinary enable (which handles a running bridge
- // as the compensated profile switch of 1.4-3). A bridge that exists is never removed by the search.
+ // as a compensated profile switch). A bridge that exists is never removed by the search.
  public sealed class SwitchOffer {
   public string ProfileId;   // the profile that passed the check
   public string FromId;      // the profile that had no usable address

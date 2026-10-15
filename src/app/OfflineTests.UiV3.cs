@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace AgDns {
- // UI pass v3 (owner's third pass, 2026-10-13): no page headers, the bridge card, levels instead of switches, the browser question, line icons.
+ // UI tests: bridge card, scope selector, browser dialog and line icons.
  // The browser logic runs on invented registries and files (MemoryBrowserEnv); nothing here reads this computer's browsers.
  public static partial class OfflineTests {
   const string ChromePolicyKey=@"SOFTWARE\Policies\Google\Chrome",EdgePolicyKey=@"SOFTWARE\Policies\Microsoft\Edge",FirefoxPolicyKey=@"SOFTWARE\Policies\Mozilla\Firefox\DNSOverHTTPS";

@@ -1,4 +1,4 @@
-# Fake DnsClient module for offline tests of the "CIM hangs" case (1.4-1).
+# Fake DnsClient module for offline tests of the "CIM hangs" case.
 # Tests put the folder that contains this module FIRST on PSModulePath of a child process, so the REAL engine run by the REAL exe resolves
 # Get-DnsClient* to these stubs. No production hook is involved and the real DnsClient module is never loaded.
 #   AGDNS_FAKE_CIM = 'hang'  -> every read cmdlet sleeps for 5 minutes (a hung WMI service)

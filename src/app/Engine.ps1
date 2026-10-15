@@ -377,7 +377,7 @@ function Enable-State([bool]$Trust,[bool]$Unencrypted) {
     if(!$script:Repair){throw}
    }
   }
-  # Switching profiles (1.4-3): everything that can be refused is checked while the working bridge is still in place.
+  # Switching profiles: everything that can be refused is checked while the working bridge is still in place.
   if(Test-ForeignConflict $s){throw 'NRPT_CONFLICT'}
   Assert-RestorableJournal $s
   if(!$Unencrypted -and (Test-DohRegistrationConflict $selected @($s.Doh | Where-Object {$_.Created -and $_.Ownership -eq 'Owned'} | ForEach-Object {$_.Server}))){throw 'DOH_REGISTRATION_CONFLICT'}

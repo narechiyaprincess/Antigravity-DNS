@@ -1,6 +1,6 @@
-﻿# t9_gemini.ps1 - Tier 9: "Takzhe dlya Gemini" (night polish), offline only.
+﻿# t9_gemini.ps1 - Tier 9: Gemini scope, offline only.
 # The second host set of the catalog (geminiTargets) is a scope of the bridge: off = exactly the old behaviour, on = rules for every host, a change of scope on a
-# working bridge is the compensated switch of 1.4-3 (the old bridge stays if the new one cannot be applied), and nothing but the catalog can name a host.
+# working bridge is a compensated profile switch (the old bridge stays if the new one cannot be applied), and nothing but the catalog can name a host.
 # Engine tests run on mock cmdlets and a scratch directory; nothing contacts a provider or touches NRPT/DoH/adapters/state.json.
 # This file is saved with a BOM: Windows PowerShell 5.1 mangles non-ASCII text in a script without one.
 

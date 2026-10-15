@@ -11,7 +11,7 @@ namespace AgDns {
   public string Template{get;set;}public string[] Servers{get;set;}=new string[0];
   public string Origin{get;set;}public string Note{get;set;}public string KnownIssue{get;set;}
   public bool Custom{get;set;}
-  // Listed in the catalog but not recommended: "Select best" skips it until a benchmark gives it the "Good" verdict (1.4-4).
+  // Listed in the catalog but not recommended: "Select best" skips it until a benchmark gives it the "Good" verdict.
   public bool Experimental{get;set;}
   public string Label=>Id+(string.IsNullOrEmpty(Slot)?"":"  ·  "+Slot);
   public string Host=>new Uri(Template).IdnHost;

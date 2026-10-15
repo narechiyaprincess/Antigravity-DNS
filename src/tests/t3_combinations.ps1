@@ -95,7 +95,7 @@ $buildText = Get-Content (Join-Path $sourceRoot 'Build.ps1') -Raw
 $readmeText = Get-Content (Join-Path $projectRoot '..\README.md') -Raw -Encoding UTF8
 $buildUsesWork = ($buildText -match '\.work\\build')
 $readmeMatchesWork = ($readmeText -match '\.work\\build' -and -not ($readmeText -match 'portable/.*рабочий выпуск' -or ($readmeText -match 'portable/' -and $readmeText -match 'work/portable-next')))
-Assert-Condition ($buildUsesWork -and $readmeMatchesWork) 'T3_C07' 'Build.ps1 default staging path aligns with README documentation' 'F01+F09' -DefectId 'F09' -FailureMessage 'README.md line 38 contradicts Build.ps1 by claiming build overwrites portable/'
+Assert-Condition ($buildUsesWork -and $readmeMatchesWork) 'T3_C07' 'Build.ps1 default staging path aligns with README documentation' 'F01+F09' -DefectId 'F09' -FailureMessage 'README.md contradicts Build.ps1 by claiming build overwrites portable/'
 
 # ==============================================================================
 # T3_C08: Provider Migration P1 -> P2 with Preflight Rejection (F04, P1, P2)

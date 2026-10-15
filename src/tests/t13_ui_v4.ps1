@@ -1,4 +1,4 @@
-﻿# t13_ui_v4.ps1 - Tier 13: owner's fourth interface pass (2026-10-14): autostart without a question or a copy, levels applied at once, the profile field with its ping,
+﻿# t13_ui_v4.ps1 - Tier 13: autostart, immediate scope changes, profile latency,
 # the browser screen, the language switched without a restart, the tab bar highlight. Offline only.
 # Source contracts; the behaviour itself is in the exe's self-test (OfflineTests.UiV4.cs) and in --ui-smoke --dpi N.
 # This file is saved with a BOM: Windows PowerShell 5.1 mangles non-ASCII text in a script without one.

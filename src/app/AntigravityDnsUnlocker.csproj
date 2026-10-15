@@ -11,11 +11,8 @@
     <SelfContained>true</SelfContained>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <!-- Size 52 MB -> ~25 MB at the same start-up speed: trimming removes unused .NET and WinForms code, ReadyToRun precompiles what is left
-         (trimmed assemblies lose Microsoft's precompiled code, and without it every start JIT-compiles; measured +0.3..0.7 s).
-         This app's own assembly is kept whole (TrimmerRootAssembly: the JSON types are built by reflection). Microsoft does not support
-         trimming for WinForms, so the switches below keep what a trimmed build turns off by default (reflection-based JSON, built-in COM),
-         the whole test suite runs on the trimmed exe, and the exe's ui-surfaces check opens the tray menu, message box, save dialog and clipboard for real. -->
+    <!-- WinForms trimming requires reflection-based JSON, COM interop and the app assembly to be preserved.
+         Validate the published binary with the UI surface checks. ReadyToRun reduces startup JIT work. -->
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>full</TrimMode>
     <PublishReadyToRun>true</PublishReadyToRun>

@@ -104,7 +104,7 @@ namespace AgDns {
    if(!r.DomainsOk)score*=0.4;
    if(!r.Alive)score=0;
    r.Score=(int)Math.Round(score);
-   // 1.4-4: a pool with dead answer addresses is not fit for use. The reach threshold is the one behind the "Flaky" verdict (75 %).
+   // a pool with dead answer addresses is not fit for use. The reach threshold is the one behind the "Flaky" verdict (75 %).
    r.Selectable=r.Alive&&r.DomainsOk&&r.Availability>=0.6&&r.Stability>=0.6&&r.Reach>=ReachThreshold;
    // An experimental profile is never recommended until it earns the "Good" verdict; it stays selectable by hand.
    r.Recommendable=r.Selectable&&(!r.Experimental||r.Verdict=="Good");

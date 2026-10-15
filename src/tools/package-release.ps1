@@ -2,7 +2,7 @@
  [string]$ExePath='',
  [switch]$WhatIf
 )
-# Makes one verified build THE release, repeatably: release\AntigravityDNS.exe (the only file there) and the shortcut
+# Copies the verified build to release\AntigravityDNS.exe and updates the shortcut
 # "Открыть Antigravity DNS.lnk" in the project root, which opens it. The build output keeps the assembly name AntigravityDnsUnlocker.exe;
 # nothing in the program depends on its file name. Afterwards the published file is checked: the same SHA-256 as the build and the .csproj version; any mismatch -> exit 1.
 # No process is closed. A running copy keeps its file locked, but Windows lets a running exe be renamed: such a file (and anything else in release\)

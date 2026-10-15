@@ -137,7 +137,7 @@ try {
 } catch {}
 
 # Desired invariant: P1 rules MUST be retained when P3 migration preflight fails
-# Defect F04 currently tears down P1 before validating P3!
+# Failed preflight must preserve the active profile.
 $p1Intact = ($script:MockRules.Count -eq $p1RulesCount -and (Read-State).Phase -eq 'Active')
 Assert-Condition $p1Intact 'T4_S05' 'Scenario 5: Failed migration to P3 preserves active P1 bridge' 'F04+P1+P3' -DefectId 'F04' -FailureMessage 'Engine.ps1 deletes active P1 rules before validating P3 candidate'
 

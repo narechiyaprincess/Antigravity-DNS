@@ -10,7 +10,7 @@ namespace AgDns {
   public string Code,Title,Text,Action;public ActionKind Kind;
  }
 
- // 1.4-5: every Code the engine (Engine.ps1, Integration.ps1) or the exe (Program.cs, Recovery.cs, Connect.cs) can report -> one plain Russian sentence
+ // every Code the engine (Engine.ps1, Integration.ps1) or the exe (Program.cs, Recovery.cs, Connect.cs) can report -> one plain Russian sentence
  // and exactly one action. The log stays for details; a routine failure does not need it. A test walks the source for codes and fails on a missing entry.
  public static class CodeTable {
   static readonly Regex CodeToken=new Regex("^[A-Z][A-Z0-9_]+",RegexOptions.Compiled);
@@ -63,7 +63,7 @@ namespace AgDns {
     I("UAC_CANCELLED","Операция отменена","Запрос Windows отклонён, изменений нет.","Повторите и подтвердите запрос.",ActionKind.Retry),
     I("TRUST_DECISION_REQUIRED","Нужно ваше решение","Нужно подтвердить доверие провайдеру.","Нажмите «Подключить мост» и подтвердите.",ActionKind.Retry),
     I("OPERATION_IN_PROGRESS","Операция уже идёт","Другая операция программы ещё выполняется.","Подождите минуту и повторите.",ActionKind.Retry),
-    // 1.6-3: no usable address for this provider; another one is offered, never applied by itself
+    // no usable address for this provider; another one is offered, never applied by itself
     I("PROVIDER_SWITCH_OFFERED","Есть рабочий провайдер","Другой профиль каталога прошёл проверку всех доменов. Ничего не изменено.","Нажмите «Подключить через …» и подтвердите доверие.",ActionKind.Switch),
     I("NO_WORKING_PROVIDER","Нет рабочего провайдера","Ни один профиль каталога не прошёл проверку всех доменов на этой сети. Мост не менялся.","Повторите позже или добавьте свой профиль.",ActionKind.Retry),
     // tray health check (1.5-1): read-only; the one action is "Починить" (one UAC) or nothing

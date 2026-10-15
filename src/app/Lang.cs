@@ -84,7 +84,7 @@ namespace AgDns {
    {"достижимость адресов: ","address reachability: "},{"резолв + TLS ок (","resolve + TLS ok ("},{"резолв ок, TLS не прошёл","resolve ok, TLS failed"},{"нет ответа","no response"},
    // settings
    {"ЗАПУСК И ТРЕЙ","STARTUP AND TRAY"},{"ПРОГРАММА","PROGRAM"},
-   {"Запускать при входе в Windows","Start with Windows"},{"Следить за мостом при входе","Monitor the bridge at sign-in"},
+   {"Запускать при входе в Windows","Start with Windows"},{"Программа следит за состоянием моста","The program monitors the bridge"},
    {"При автозапуске — сразу в трей","Start in the tray"},{"Без окна, только значок у часов","No window, just the tray icon"},
    {"Крестик сворачивает в трей","Close button hides to the tray"},{"Выйти — через меню значка в трее","Exit from the tray icon menu"},
    {"Уведомлять о сбоях моста","Notify about bridge problems"},{"Сообщение, если мост перестал работать","A pop-up if the bridge stops working"},

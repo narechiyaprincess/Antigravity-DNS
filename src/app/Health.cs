@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace AgDns {
- // Light = the cheap provider-only check every 10 minutes (1.6-4): journal + DoH/TLS to the active addresses, no engine and no CIM.
+ // Light = the cheap provider-only check every 10 minutes: journal + DoH/TLS to the active addresses, no engine and no CIM.
  public enum HealthTrigger { Startup, NetworkChange, Resume, Periodic, Manual, Light }
  // Off = no bridge is configured or the user switched it off (nothing to check, nothing to fix). Suspect = a soft failure seen once, confirmed by one more check
  // before anyone is told. Drift = the bridge differs from what was configured. Unknown = the check itself could not be completed (e.g. WMI did not answer).
@@ -15,7 +15,7 @@ namespace AgDns {
  public sealed class HealthReport {
   public HealthKind Kind;public string Code;public string Detail;public DateTime Utc;public HealthTrigger Trigger;
   public bool Light;    // produced by the light check: it says nothing about the rules, so a healthy light report never clears a failure of the full check
-  public bool CanFix;   // the tray offers "Починить": one UAC, the 1.4-2/1.4-3 flow (addresses found again if needed, compensated switch)
+  public bool CanFix;   // Tray repair: one UAC request, address resolution and compensated profile switch.
  }
 
  public sealed class ProviderProbe {
@@ -35,7 +35,7 @@ namespace AgDns {
   public TimeSpan CimDeadline=TimeSpan.FromSeconds(15);     // the engine's read-only status; a hung CIM is cut off here
   public TimeSpan MinInterval=TimeSpan.FromSeconds(60);     // never two checks closer than this (also the delay of the single confirmation re-check)
   public TimeSpan Period=TimeSpan.FromMinutes(45);          // 30-60 minutes: the full check (rules, CIM status, provider, Windows resolver)
-  public TimeSpan LightPeriod=TimeSpan.FromMinutes(10);     // the light provider check in between (1.6-4)
+  public TimeSpan LightPeriod=TimeSpan.FromMinutes(10);     // Provider-only check between full checks.
   public TimeSpan StartupDelay=TimeSpan.FromSeconds(5);
   public TimeSpan NetworkDebounce=TimeSpan.FromSeconds(15);
   public TimeSpan ResumeDelay=TimeSpan.FromSeconds(20);     // the network is usually not up yet right after wake-up
@@ -111,7 +111,7 @@ namespace AgDns {
   HealthReport R(HealthKind kind,string code,string detail,HealthTrigger t,bool canFix=false)=>new HealthReport{Kind=kind,Code=code,Detail=detail,Utc=clock(),Trigger=t,CanFix=canFix,Light=t==HealthTrigger.Light};
   bool StillActive()=>Recovery.PhaseOfJournal(probe.Journal())=="Active";
 
-  // The light check (1.6-4): the same journal gate as the full one, then only the provider: the addresses the journal says are active get DoH + TLS for both domains.
+  // The light check: the same journal gate as the full one, then only the provider: the addresses the journal says are active get DoH + TLS for both domains.
   // No engine, no CIM, no Windows-resolver comparison. A failure goes through the same Suspect -> Drift confirmation; a success only withdraws an earlier provider failure.
   async Task<HealthReport> LightAsync(CancellationToken ct) {
    const HealthTrigger t=HealthTrigger.Light;

@@ -135,7 +135,7 @@ namespace AgDns {
   }
  }
  public static class Program {
-  // Short deadline of the unelevated CIM pre-check that runs before any UAC prompt (1.4-1).
+  // Short deadline of the unelevated CIM pre-check that runs before any UAC prompt.
   public static readonly TimeSpan GuardDeadline=TimeSpan.FromSeconds(10);
   // enable can be a profile switch: preflight of the new profile, removal of the old one, apply, and on failure a second preflight plus re-apply of the previous profile.
   // 90 s covered one preflight; with two a slow network ran into the kill in the middle of the switch, so enable gets more room.
@@ -143,7 +143,7 @@ namespace AgDns {
   // The window waits for the elevated child a little longer than the child's own engine deadline, so the child's honest timeout receipt is read instead of a bare "may still be running".
   public static readonly TimeSpan ElevationGrace=TimeSpan.FromSeconds(15);
   public static TimeSpan ElevationWait(string action)=>Deadline(action)+ElevationGrace;
-  // Target domains and the default profile come from the embedded profiles.json only (1.4-6).
+  // Target domains and the default profile come from the embedded profiles.json only.
   // "Также для Gemini": the only way the target set grows. There is no way to name a host on the command line; the extra hosts come from the catalog (geminiTargets).
   public static volatile bool Gemini;
   // "+ Браузер" (--google): the Gemini hosts plus the catalog's Google suffixes. Suffixes are NRPT namespaces only; every check runs on Hosts.
@@ -306,7 +306,7 @@ namespace AgDns {
    var info=SystemModulesOnly(new ProcessStartInfo(PowerShell){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true,StandardOutputEncoding=Encoding.UTF8,StandardErrorEncoding=Encoding.UTF8});
    foreach(string a in new[]{"-NoProfile","-NonInteractive","-ExecutionPolicy","Bypass","-File",prepared.Script("Engine.ps1"),"-Action",action,"-ExePath",prepared.ExePath})info.ArgumentList.Add(a);
    if(trust)info.ArgumentList.Add("-TrustProxy");if(plain)info.ArgumentList.Add("-Plain");if(repair&&action=="enable")info.ArgumentList.Add("-Repair");
-   // Targets and the default profile are handed to the engine from the one catalog (1.4-6); the engine holds no copy of its own.
+   // Targets and the default profile are handed to the engine from the one catalog; the engine holds no copy of its own.
    info.ArgumentList.Add("-Targets");info.ArgumentList.Add(string.Join(",",Targets));
    if((servers==null||servers.Length==0)&&string.IsNullOrWhiteSpace(template))servers=Servers;
    if(string.IsNullOrWhiteSpace(template))template=DefaultTemplate;
@@ -620,7 +620,7 @@ namespace AgDns {
      string profName=args.Contains("--profile")&&Array.IndexOf(args,"--profile")+1<args.Length?args[Array.IndexOf(args,"--profile")+1]:null;
      bool mutation=action=="enable"||action=="restore";
      if(mutation&&!IsAdmin()){
-      // 1.4-1: no UAC prompt and no mutation while CIM/WMI does not answer.
+      // no UAC prompt and no mutation while CIM/WMI does not answer.
       var guard=Recovery.CheckCimAsync(netArgs.Servers,netArgs.Template,profName,default).GetAwaiter().GetResult();
       if(!guard.Allowed){Console.WriteLine(Recovery.BlockedJson(action,guard,Recovery.ReadJournal()));return 1;}
       var elevated=Elevate(action,args.Contains("--trust-proxy"),args.Contains("--plain"),netArgs.Servers,netArgs.Template,profName,default,args.Contains("--repair")).GetAwaiter().GetResult();

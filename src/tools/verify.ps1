@@ -1,12 +1,11 @@
 ﻿param([string]$Tag='run',[switch]$NoBuild,[switch]$NoPublish,[string]$OutDir='.work\build',[string]$ExeOverride='',[string]$Dotnet='', [ValidateSet('Current','All','1','2','3','4','5','6','7','8','9','10','11','12','13','14')][string]$Tier='Current')
-# The whole check: build, self-test, offline E2E, the window renders (states, stress, surfaces, four scales x two languages) and the exe alone in an empty folder.
-# Paths are relative to src\ (this script lives in src\tools). Logs: src\.work\logs\<Tag>. Everything green -> tools\package-release.ps1 makes this build
-# the release (release\, portable\, the shortcut in the project root); -NoPublish turns that off. Exit 1 when anything is red.
+# Build, offline tests, UI checks and standalone EXE verification.
+# Logs: src\.work\logs\<Tag>. A passing run updates release\ unless -NoPublish is set.
 $ErrorActionPreference='Continue'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 Set-Location $root
 $work=Join-Path $root '.work'
-# dotnet: -Dotnet, then AGDNS_DOTNET, then the SDK on PATH.
+# SDK selection: -Dotnet, AGDNS_DOTNET, then PATH.
 $dn=if($Dotnet){$Dotnet}elseif($env:AGDNS_DOTNET){$env:AGDNS_DOTNET}else{'dotnet'}
 $log=Join-Path $work "logs\$Tag"
 New-Item -ItemType Directory -Force $log|Out-Null
@@ -69,7 +68,7 @@ try{
  "EMPTYDIR version=$ver (csproj $csv) failures=$emptyBad"
 }finally{Remove-Item -LiteralPath $empty -Recurse -Force -ErrorAction SilentlyContinue}
 
-# All green -> this build becomes the release (release\, portable\ and the shortcut in the project root); a red check publishes nothing.
+# Update the release and shortcut only after all checks pass.
 $allOk=($s -eq 0 -and $e -eq 0 -and $u -eq 0 -and $u2 -eq 0 -and $u3 -eq 0 -and $u4 -eq 0 -and $scaleBad -eq 0 -and $emptyBad -eq 0)
 $pub=0
 if($allOk -and -not $NoPublish){

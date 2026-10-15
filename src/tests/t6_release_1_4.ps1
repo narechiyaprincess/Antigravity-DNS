@@ -54,7 +54,7 @@ function Invoke-Ps([string]$Command, [int]$TimeoutSec = 60, [string]$FileArgs = 
 }
 
 # ==============================================================================
-# R14-6 (1.4-6): one source for the target domains and the default profile
+# R14-6: one source for the target domains and the default profile
 # ==============================================================================
 $catalogFile = Join-Path $sourceRoot 'profiles.json'
 $cat = Get-Content -LiteralPath $catalogFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -103,7 +103,7 @@ if ($haveExe) {
 }
 
 # ==============================================================================
-# R14-4 (1.4-4): honest choice of the best profile (reach >= 75 %, experimental flag), through --benchmark-synthetic
+# R14-4: honest choice of the best profile (reach >= 75 %, experimental flag), through --benchmark-synthetic
 # ==============================================================================
 $D1 = 'daily-cloudcode-pa.googleapis.com'; $D2 = 'generativelanguage.googleapis.com'
 function New-A([string]$name, [string[]]$ips) { [Convert]::ToBase64String((New-SyntheticDnsResponse -QuestionDomain $name -QuestionType 1 -Id 1234 -AnswerRecords @($ips | ForEach-Object { New-ARecord $name $_ }))) }
@@ -141,7 +141,7 @@ if ($haveExe) {
 }
 
 # ==============================================================================
-# R14-3 (1.4-3): switching profiles never costs a working bridge (mock cmdlets, no live changes)
+# R14-3: switching profiles never costs a working bridge (mock cmdlets, no live changes)
 # ==============================================================================
 $P1s = @('179.254.166.171', '164.5.224.81'); $P1t = 'https://dns.malw.link/dns-query'
 $P2s = @('185.185.185.185', '185.185.185.186'); $P2t = 'https://xbox-dns.ru/dns-query'
@@ -210,7 +210,7 @@ $posNet = $enableBody.IndexOf('$net=Get-Network'); $posConf = $enableBody.IndexO
 Assert-Condition ($posNet -gt 0 -and $posNet -lt $posConf -and $posConf -lt $posRestore -and $posDoh -lt $posRestore) 'T6_S08' 'Enable-State order: preflight, conflict check and DoH check all come before Restore-State' 'R14-3'
 
 # ==============================================================================
-# R14-2 (1.4-2): catalog 1.4 and the engine side of connect-time addresses
+# R14-2: catalog 1.4 and the engine side of connect-time addresses
 # ==============================================================================
 $byIdCat = @{}; foreach ($p in $cat.profiles) { $byIdCat[$p.id] = $p }
 $p3 = $byIdCat['dns.comss.one']
@@ -239,7 +239,7 @@ Assert-Condition ($rej -like '*DOH_NO_VALIDATED_ENDPOINT*' -and $script:MockWrit
 $script:MockNetworkFailure = $false
 
 # ==============================================================================
-# R14-1 (1.4-1, offline part): CIM hang gate, restore from Restoring, RESTORE_UNCONFIRMED instruction
+# R14-1: CIM hang gate, restore from Restoring, RESTORE_UNCONFIRMED instruction
 # ==============================================================================
 # Restore is always allowed from Restoring, and an interrupted restore can be repeated.
 New-ActiveBridge 't6_rs_a' | Out-Null
@@ -314,7 +314,7 @@ $prodText = (Get-Content -LiteralPath (Join-Path $sourceRoot 'Recovery.cs') -Raw
 Assert-Condition ($prodText -notmatch 'Registry\.|OpenSubKey|DeleteSubKey|SetValue|reg\.exe') 'T6_R13' 'The registry fallback is not wired into production code (Recovery.cs only generates text)' 'R14-1'
 
 # ==============================================================================
-# R14-5 (1.4-5): every code the engine or the exe can return has a plain Russian text and one action
+# R14-5: every code the engine or the exe can return has a plain Russian text and one action
 # ==============================================================================
 $codeRx = "'([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)+)(?=[:' ])"
 $found = @{}
@@ -345,7 +345,7 @@ if ($haveExe) {
 }
 
 # ==============================================================================
-# R14-6 (1.4-6), packaging: archive name carries the .csproj version, which the exe also reports
+# R14-6, packaging: archive name carries the .csproj version, which the exe also reports
 # ==============================================================================
 if ($haveExe) {
     $distDir = Join-Path $ScratchPath 'dist'

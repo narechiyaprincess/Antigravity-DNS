@@ -33,7 +33,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\app\Build.ps1 -Dot
 
 For the verification wrapper, pass `-Dotnet $sdk` or set `$env:AGDNS_DOTNET = $sdk` in the current PowerShell session. `dev.ps1` and the optional mutation tool also respect `AGDNS_DOTNET`. No personal SDK path is stored in the repository.
 
-`<Version>` in [the project file](../src/app/AntigravityDnsUnlocker.csproj) is the application version. Historical tier names such as `t8_release_1_6.ps1` identify previous development milestones, not the current release number.
+`<Version>` in [the project file](../src/app/AntigravityDnsUnlocker.csproj) is the application version. Historical tier names such as `t8_release_1_6.ps1` identify test groups; they do not set the application version.
 
 ### Existing WinForms trimming tradeoff
 
@@ -68,13 +68,9 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\tests\run_offline_
 
 ### Historical tiers 1–4
 
-The legacy contract tests remain available through `-Tier All` or `-Tier 1` through `4`. They require the original `src/tests/fixtures/baseline-1.1.0/AntigravityDnsUnlocker.exe`; that compiled fixture and its PDB are intentionally not tracked. The original fixture EXE has SHA-256:
+The legacy contract tests remain available through `-Tier All` or `-Tier 1` through `4`. The historical PowerShell scripts are retained as source fixtures; their existence and hashes are checked without distributing the old executable or its debug symbols.
 
-```text
-bf6c99533fa520be03a8397c3f0e681b128594a1188d9883c6a9e3e61e9f7364
-```
-
-Obtain it only from the maintainer's original archive and check the hash. The adjacent historical PowerShell fixtures remain in source. Tier 1 also asserts the historical local-release layout, a root launcher pointing to `release/AntigravityDNS.exe`, and the old README's local-launch instructions; a clean public source checkout does not satisfy those layout assertions. These historical tests are not a public-clone acceptance gate. The runner fails early if a requested legacy binary is absent; it does not silently skip it or count it as passing.
+Tier 1 also asserts a local release layout: a root launcher pointing to `release/AntigravityDNS.exe` and local-launch instructions in the root README. A public source checkout has a different README and no generated launcher. Use the default `Current` set for public-checkout verification.
 
 ## Local packaging
 
@@ -88,5 +84,13 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\tools\package-rele
 This helper manages `release/` as an application output directory: it moves other contents aside, can remove previous `.work/replaced` leftovers, and updates the shortcut. Keep personal files out of these output directories. `-WhatIf` previews the destination before replacement. It verifies version and SHA-256 and does not stop running copies.
 
 The separate [app/Package.ps1](../src/app/Package.ps1) helper creates an archive named `AntigravityDnsUnlocker-<version>-win-x64.zip` with `AntigravityDnsUnlocker.exe` and optional text instructions in `src/.work/dist/`. It also writes checksums. It is an alternative packaging format, not an additional runtime dependency.
+
+To package the source:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\tools\package-source.ps1
+```
+
+This creates an ignored `source code.zip` with source, tests, documentation, license, repository templates and screenshots. Build output, logs, executables and debug symbols are excluded.
 
 For a public single-file asset, copy the verified EXE to an external release staging folder as `Antigravity-DNS-v1.0.0-win-x64.exe`, generate `SHA256SUMS.txt` with `Get-FileHash`, and keep release notes beside it. Do not commit executable files, generated ZIPs, or signing material. Publishing a tag/release and uploading assets are separate maintainer actions.

@@ -32,11 +32,9 @@ $buildContent = Get-Content (Join-Path $sourceRoot 'Build.ps1') -Raw
 $targetsWorkPortable = $buildContent -match '\$OutputDirectory\s*=\s*\(Join-Path \$PSScriptRoot ''\.\.\\\.work\\build''\)'
 Assert-Condition $targetsWorkPortable 'T1_F01_01' 'Build.ps1 default output directory is src\.work\build' 'F01'
 
-# T1_F01_02: Baseline portable\ files remain intact and match baseline manifests
-$portableExe = Join-Path $portableRoot 'AntigravityDnsUnlocker.exe'
-$portableEngine = Join-Path $portableRoot 'Engine.ps1'
-$baselineIntact = (Test-Path $portableExe) -and (Test-Path $portableEngine)
-Assert-Condition $baselineIntact 'T1_F01_02' 'Baseline portable directory files exist and are preserved' 'F01'
+# T1_F01_02: Historical script fixtures remain available.
+$baselineMissing = @('Engine.ps1','Integration.ps1','EmergencyRestore.ps1' | Where-Object { -not (Test-Path -LiteralPath (Join-Path $portableRoot $_)) })
+Assert-Condition ($baselineMissing.Count -eq 0) 'T1_F01_02' 'Historical script fixtures exist' 'F01'
 
 # T1_F01_03: Csproj embeds the companion scripts (single-exe contract; nothing is copied next to the exe)
 $csprojContent = Get-Content (Join-Path $sourceRoot 'AntigravityDnsUnlocker.csproj') -Raw
@@ -63,21 +61,21 @@ Assert-Condition $allPresent 'T1_F01_05' 'All required companion scripts present
 # F02: Engine Parameter Binding (5 tests)
 # ==============================================================================
 # T1_F02_01: Custom -Servers parameter preserved without defaulting
-# In source/Engine.ps1: lines 13-15 clobbers $script:Servers
+# Detect regressions that overwrite explicit server parameters.
 $engineRaw = Get-Content (Join-Path $sourceRoot 'Engine.ps1') -Raw
 $engineLines = Get-Content (Join-Path $sourceRoot 'Engine.ps1')
 # Check whether script-scope assignment unconditionally overwrites $Servers before parsing
 $hasParamClobberServers = ($engineRaw -match '\$script:Servers\s*=\s*@\(''179\.254\.166\.171''')
-# In defect condition: $script:Servers is assigned before $Servers is checked
-Assert-Condition (-not $hasParamClobberServers) 'T1_F02_01' 'Engine.ps1 preserves -Servers parameter without script-scope clobbering' 'F02' -DefectId 'F02' -FailureMessage 'Engine.ps1 line 13 unconditionally overwrites $Servers with default array'
+# Explicit parameters must take precedence over catalog defaults.
+Assert-Condition (-not $hasParamClobberServers) 'T1_F02_01' 'Engine.ps1 preserves -Servers parameter without script-scope clobbering' 'F02' -DefectId 'F02' -FailureMessage 'Engine.ps1 unconditionally overwrites $Servers with default array'
 
 # T1_F02_02: Custom -Template parameter preserved without defaulting
 $hasParamClobberTemplate = ($engineRaw -match '\$script:Template\s*=\s*''https://dns\.malw\.link/dns-query''')
-Assert-Condition (-not $hasParamClobberTemplate) 'T1_F02_02' 'Engine.ps1 preserves -Template parameter without script-scope clobbering' 'F02' -DefectId 'F02' -FailureMessage 'Engine.ps1 line 14 unconditionally overwrites $Template with default string'
+Assert-Condition (-not $hasParamClobberTemplate) 'T1_F02_02' 'Engine.ps1 preserves -Template parameter without script-scope clobbering' 'F02' -DefectId 'F02' -FailureMessage 'Engine.ps1 unconditionally overwrites $Template with default string'
 
 # T1_F02_03: Custom -ProfileName parameter preserved without resetting to empty
 $hasParamClobberProfile = ($engineRaw -match '\$script:ProfileName\s*=\s*''''')
-Assert-Condition (-not $hasParamClobberProfile) 'T1_F02_03' 'Engine.ps1 preserves -ProfileName parameter without resetting to empty' 'F02' -DefectId 'F02' -FailureMessage 'Engine.ps1 line 15 unconditionally resets $ProfileName to empty string'
+Assert-Condition (-not $hasParamClobberProfile) 'T1_F02_03' 'Engine.ps1 preserves -ProfileName parameter without resetting to empty' 'F02' -DefectId 'F02' -FailureMessage 'Engine.ps1 unconditionally resets $ProfileName to empty string'
 
 # T1_F02_04: Server string parsing handles comma, semicolon, whitespace
 $testSplit = Split-Servers '1.1.1.1, 8.8.8.8; 9.9.9.9'
@@ -94,15 +92,15 @@ Assert-Condition $hasValidateSet 'T1_F02_05' 'Engine.ps1 declares strict Validat
 $progContent = Get-Content (Join-Path $sourceRoot 'Program.cs') -Raw
 # T1_F03_01: Program.cs parses --servers and passes to candidate preflight
 $parsesCliServers = ($progContent -match 'args\.Contains\("--servers"\)' -or $progContent -match 'Array\.IndexOf\(args,\s*"--servers"\)')
-Assert-Condition $parsesCliServers 'T1_F03_01' 'Program.cs parses --servers argument from CLI' 'F03' -DefectId 'F03' -FailureMessage 'Program.cs lines 99-100 checks only --network and ignores --servers'
+Assert-Condition $parsesCliServers 'T1_F03_01' 'Program.cs parses --servers argument from CLI' 'F03' -DefectId 'F03' -FailureMessage 'Program.cs checks only --network and ignores --servers'
 
 # T1_F03_02: Program.cs parses --template and passes to candidate preflight
 $parsesCliTemplate = ($progContent -match 'args\.Contains\("--template"\)' -or $progContent -match 'Array\.IndexOf\(args,\s*"--template"\)')
-Assert-Condition $parsesCliTemplate 'T1_F03_02' 'Program.cs parses --template argument from CLI' 'F03' -DefectId 'F03' -FailureMessage 'Program.cs lines 99-100 checks only --network and ignores --template'
+Assert-Condition $parsesCliTemplate 'T1_F03_02' 'Program.cs parses --template argument from CLI' 'F03' -DefectId 'F03' -FailureMessage 'Program.cs checks only --network and ignores --template'
 
 # T1_F03_03: CheckCandidate passes template to Wire.Doh
 $passesTemplateToDoh = ($progContent -match 'Wire\.Doh\(.*,\s*template\)' -or $progContent -match 'Wire\.Doh\(h,\s*type,\s*ip,\s*\d+,\s*template\)')
-Assert-Condition $passesTemplateToDoh 'T1_F03_03' 'CheckCandidate passes configured template to Wire.Doh' 'F03' -DefectId 'F03' -FailureMessage 'Program.cs line 46 calls Wire.Doh(h,type,ip,6) without passing template'
+Assert-Condition $passesTemplateToDoh 'T1_F03_03' 'CheckCandidate passes configured template to Wire.Doh' 'F03' -DefectId 'F03' -FailureMessage 'Program.cs calls Wire.Doh(h,type,ip,6) without passing template'
 
 # T1_F03_04: CLI Interface Contract defines Candidate response schema
 $hasCandidateSchema = ($progContent -match 'class Candidate' -and $progContent -match 'public string Server;')
@@ -116,7 +114,7 @@ Assert-Condition $elevatesWithParams 'T1_F03_05' 'Elevated helper formats comman
 # F04: Safe Lifecycle, Preflight Replacement & Partial Availability (5 tests)
 # ==============================================================================
 # T1_F04_01: Validate endpoints before tearing down active bridge (Preflight-First)
-# In Engine.ps1: line 211 calls Restore-State before line 216 Get-Network
+# Candidate validation must precede removal of the active profile.
 $engineLines = Get-Content (Join-Path $sourceRoot 'Engine.ps1')
 $restoreLine = -1
 $networkLine = -1
@@ -125,7 +123,7 @@ for ($i = 190; $i -lt $engineLines.Count; $i++) {
     if ($engineLines[$i] -match '\$net=Get-Network' -and $networkLine -eq -1) { $networkLine = $i }
 }
 $preflightFirst = ($networkLine -ne -1 -and $restoreLine -ne -1 -and $networkLine -lt $restoreLine)
-Assert-Condition $preflightFirst 'T1_F04_01' 'Preflight endpoint validation occurs before tearing down active bridge' 'F04' -DefectId 'F04' -FailureMessage 'Engine.ps1 line 211 calls Restore-State BEFORE line 216 Get-Network'
+Assert-Condition $preflightFirst 'T1_F04_01' 'Preflight endpoint validation occurs before tearing down active bridge' 'F04' -DefectId 'F04' -FailureMessage 'Engine.ps1 calls Restore-State before Get-Network'
 
 # T1_F04_02: Partial subset availability preserves active bridge without Restore-State
 Reset-MockEnvironment (Join-Path $ScratchPath 't1_f04_02')
@@ -299,10 +297,10 @@ Assert-Condition $engineMutexGuarded 'T1_F08_05' 'Engine enforces mutual exclusi
 # ==============================================================================
 $readmeContent = Get-Content (Join-Path $repoRoot 'README.md') -Raw -Encoding UTF8
 # T1_F09_01: README.md does NOT claim build overwrites portable/
-# Line 38 of README.md claims default build publishes to portable/ and overwrites release
+# Reject obsolete documentation that names a release folder as build output.
 $readmeClaimsOverwritingPortable = ($readmeContent -match 'portable/.*рабочий выпуск' -or 
                                     ($readmeContent -match 'portable/' -and $readmeContent -match 'work/portable-next'))
-Assert-Condition (-not $readmeClaimsOverwritingPortable) 'T1_F09_01' 'README.md does not claim build overwrites portable/' 'F09' -DefectId 'F09' -FailureMessage 'README.md line 38 claims build overwrites portable/ release directory'
+Assert-Condition (-not $readmeClaimsOverwritingPortable) 'T1_F09_01' 'README.md does not claim build overwrites portable/' 'F09' -DefectId 'F09' -FailureMessage 'README.md claims build overwrites portable/ release directory'
 
 # T1_F09_02: README.md documents src\.work\build as the build output directory
 $readmeDocumentsWorkPortable = ($readmeContent -match '\.work\\build' -or $readmeContent -match '\.work/build')
@@ -326,7 +324,7 @@ Assert-Condition $shortcutExists 'T1_F09_05' 'Launcher shortcut (*Antigravity DN
 # P1: Provider 1 Contract - dns.malw.link (5 tests)
 # ==============================================================================
 # T1_P1_01: P1 default servers match specification
-# 1.4-6: the P1 defaults live only in profiles.json (the engine receives them as parameters / reads the staged copy).
+# the P1 defaults live only in profiles.json (the engine receives them as parameters / reads the staged copy).
 $catalogRaw = Get-Content (Join-Path $sourceRoot 'profiles.json') -Raw -Encoding UTF8
 $p1ServersMatch = ($catalogRaw -match '179\.254\.166\.171' -and $catalogRaw -match '164\.5\.224\.81')
 Assert-Condition $p1ServersMatch 'T1_P1_01' 'P1 servers match 179.254.166.171 and 164.5.224.81' 'P1'

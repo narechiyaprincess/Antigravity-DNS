@@ -1,4 +1,4 @@
-# Packages the built exe as AntigravityDnsUnlocker-<version>-win-x64.zip + SHA256SUMS.txt (1.4-6).
+# Packages the built exe as AntigravityDnsUnlocker-<version>-win-x64.zip + SHA256SUMS.txt.
 # <version> is read from <Version> in AntigravityDnsUnlocker.csproj and must equal what the exe itself reports (--version): one version number everywhere.
 # -ReadmePath adds that text file to the archive next to the exe (the release package: the portable folder).
 # Nothing is published or uploaded; the output goes to -OutputDirectory (default src\.work\dist).

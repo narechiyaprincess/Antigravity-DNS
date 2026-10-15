@@ -1,6 +1,6 @@
-﻿# run_offline_e2e_tests.ps1 - Master Offline E2E Test Suite Runner
-# 100% OFFLINE verification with zero host network mutations.
-# Supports 5-tier systematic methodology (tier 8: Release 1.6 resilience): Tier 1-4 (1.2.0 contracts) and Tier 5 (1.3.0: single exe, catalog, benchmark, UI) and Tier 6 (1.4 work items) and Tier 7 (1.4 review and 1.5 work items).
+﻿# Offline E2E test runner: tiers 1-14.
+# Synthetic DNS responses and mocked system cmdlets; host state is checked before and after.
+
 
 [CmdletBinding()]
 param(
@@ -16,17 +16,8 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $workRoot = Join-Path $projectRoot '.work'
 
-# Current runs tiers 5-14, which use the current application. Compiled historical
-# fixtures are deliberately excluded from the public source tree.
-if ($Tier -in @('All','1','2','3','4')) {
-    $baselineExe = Join-Path $PSScriptRoot 'fixtures\baseline-1.1.0\AntigravityDnsUnlocker.exe'
-    if (-not (Test-Path -LiteralPath $baselineExe)) {
-        throw 'Legacy tiers 1-4 require the original baseline-1.1.0 executable. See docs/BUILDING.md. Use -Tier Current for source-checkout verification.'
-    }
-}
-
 Write-Host "======================================================================" -ForegroundColor Cyan
-Write-Host " Antigravity DNS - Systematic Offline E2E Test Runner (tiers 1-14)" -ForegroundColor Cyan
+Write-Host " Antigravity DNS - Offline E2E Test Runner (tiers 1-14)" -ForegroundColor Cyan
 Write-Host "======================================================================" -ForegroundColor Cyan
 Write-Host "Timestamp (UTC) : $([DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm:ssZ'))" -ForegroundColor Gray
 Write-Host "Target Tier     : $Tier" -ForegroundColor Gray
@@ -150,8 +141,8 @@ try {
         Assert-HostSafetyBaselineUnchanged "Final Runner Invariant"
         $liveRun = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name AntigravityDnsUnlocker -ErrorAction SilentlyContinue
         if ([string]$liveRun.AntigravityDnsUnlocker -ne $global:HostBaselineRunValue) { throw "CRITICAL HOST SAFETY VIOLATION: live HKCU Run entry changed" }
-        Write-Host "  CERTIFIED: Zero mutations occurred on Windows host network adapter settings," -ForegroundColor Green
-        Write-Host "             live NRPT rules, DoH registrations, or %ProgramData%\state.json." -ForegroundColor Green
+        Write-Host "  PASS: Host network adapter settings are unchanged," -ForegroundColor Green
+        Write-Host "        as are NRPT rules, DoH registrations and state.json." -ForegroundColor Green
     } catch {
         $hostUnchanged = $false
         Write-Host "  $($_.Exception.Message)" -ForegroundColor Red
@@ -182,7 +173,7 @@ Write-Host "Execution Time  : $($startTime.Elapsed.TotalSeconds.ToString('F2')) 
 Write-Host ""
 
 if ($global:DefectCount -gt 0) {
-    Write-Host "--- Known Implementation Defects Identified for Milestone Remediation ---" -ForegroundColor Yellow
+    Write-Host "--- Regression failures grouped by defect ID ---" -ForegroundColor Yellow
     $defects = $global:TestResults | Where-Object { $_.DefectId } | Group-Object DefectId
     foreach ($d in $defects) {
         Write-Host "  Defect $($d.Name) ($($d.Count) test cases reproduced):" -ForegroundColor Yellow
@@ -220,7 +211,7 @@ if ($fatalError -or $global:FailCount -gt 0) {
     exit 1
 }
 
-# If only known defects failed, exit 0 with defect warnings for milestone fix track
+# A successful run has no failed assertions.
 if (($global:FailCount - $global:DefectCount) -eq 0) {
     Write-Host "Offline test suite executed cleanly without unhandled errors." -ForegroundColor Green
     exit 0

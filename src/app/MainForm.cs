@@ -34,7 +34,7 @@ namespace AgDns {
   CodeInfo SwitchOfferStatus(string from,string to){Title(()=>CodeTable.Lookup("PROVIDER_SWITCH_OFFERED").Title);Detail(()=>CodeTable.SwitchOfferText(from,to)+"\n"+CodeTable.Lookup("PROVIDER_SWITCH_OFFERED").Action);return CodeTable.Lookup("PROVIDER_SWITCH_OFFERED");}
   CodeInfo StatusInfo(string code){Title(()=>CodeTable.Lookup(code).Title);Detail(()=>{var i=CodeTable.Lookup(code);return i.Text+"\n"+i.Action;});return CodeTable.Lookup(code);}
   void BenchStatus(Func<string> f){benchFn=f;benchStatus.Text=f();}
-  string addrSource="";   // where the active bridge's addresses came from (1.4-2); shown in «Подробнее», not on the main page
+  string addrSource="";   // Source of the active bridge addresses, shown in «Подробнее».
   readonly LogoBox bigLogo=new LogoBox();
   readonly Font bigFont=Theme.F(11.5f,true),smallFont=Theme.F(10,true);
   readonly PillButton bridge=new PillButton(),diagBtn=new PillButton(),copyBtn=new PillButton(),clearBtn=new PillButton(),saveCustom=new PillButton(),delCustom=new PillButton(),findIp=new PillButton(),benchRun=new PillButton(),benchBest=new PillButton(),customClose=new PillButton();
@@ -61,7 +61,7 @@ namespace AgDns {
   NotifyIcon tray;ToolStripMenuItem trayToggle,trayStatus,trayFix,trayOpen,trayExit;Label versionLabel;string detailsProfile,detailsExtra;Icon iconOn,iconOff,trayOn,trayOff;
   // 1.5-1 tray health check (read-only, no UAC; "Починить" is always the user's click) and 1.5-2 support report.
   readonly PillButton fixBtn=new PillButton(),reportBtn=new PillButton();
-  // 1.6-3: another catalog profile that passed the check when the current one has no usable address; offered, never applied by itself.
+  // another catalog profile that passed the check when the current one has no usable address; offered, never applied by itself.
   SwitchOffer offer;readonly PillButton altBtn=new PillButton();
   HealthScheduler healthSched;HealthMonitor healthMon;HealthReport health,lastCheck;System.Windows.Forms.Timer healthTimer;CancellationTokenSource healthCts;bool healthRunning;string lastNotifiedCode;
   OperationHistory history;
@@ -98,7 +98,7 @@ namespace AgDns {
    profileSelect.Items.Clear();foreach(var p in profiles)profileSelect.Items.Add(p.Label);
    RebuildBenchRows();
   }
-  // 1.4-2: a custom profile needs only the DoH URL. The name defaults to the host; IPs are an optional advanced field (without them the addresses are found at connect time).
+  // a custom profile needs only the DoH URL. The name defaults to the host; IPs are an optional advanced field (without them the addresses are found at connect time).
   internal static bool TryParseCustom(string name,string servers,string template,out string[] srv,out string tmpl,out string error,out string finalName){
    srv=null;tmpl=null;error=null;finalName=null;
    if(!Uri.TryCreate((template??"").Trim(),UriKind.Absolute,out var uri)||uri.Scheme!=Uri.UriSchemeHttps||IPAddress.TryParse(uri.IdnHost,out _)){error=L.T("DoH-ссылка должна начинаться с https:// и содержать имя хоста, а не IP.");return false;}
@@ -233,7 +233,7 @@ namespace AgDns {
    try{
     var runs=Benchmark.LoadHistory();var last=runs.LastOrDefault(r=>!r.Synthetic);
     if(last==null)return;
-    // A measurement from an earlier session is shown with its date and never offered as a fresh recommendation (1.4-4).
+    // A measurement from an earlier session is shown with its date and never offered as a fresh recommendation.
     lastBench=last;lastBenchStale=true;foreach(var r in last.Results)r.Best=false;ApplyBenchResults(last);
     string when=DateTime.TryParse(last.StartedUtc,null,System.Globalization.DateTimeStyles.RoundtripKind,out var dt)?dt.ToLocalTime().ToString("dd.MM.yyyy HH:mm"):"?";
     BenchStatus(()=>L.T("Замер от ")+when+L.T(" (прошлый запуск). Сеть могла измениться: нажмите «Измерить»."));
@@ -353,7 +353,7 @@ namespace AgDns {
    var a=settingsCardA=Card(pg,14,4,cw,222);
    a.Controls.Add(MakeLabel(L.T("ЗАПУСК И ТРЕЙ"),Theme.Muted,Theme.F(7.5f,true),new Rectangle(18,12,iw,14)));
    void T(ToggleRow t,IconKind icon,string text,string sub,int y,bool divider){t.Icon=icon;t.Text=text;t.Subtitle=sub;t.Divider=divider;t.Bounds=new Rectangle(18,y,iw,46);a.Controls.Add(t);}
-   T(tgAutostart,IconKind.Power,L.T("Запускать при входе в Windows"),L.T("Следить за мостом при входе"),30,true);
+   T(tgAutostart,IconKind.Power,L.T("Запускать при входе в Windows"),L.T("Программа следит за состоянием моста"),30,true);
    T(tgQuiet,IconKind.Tray,L.T("При автозапуске — сразу в трей"),L.T("Без окна, только значок у часов"),76,true);
    T(tgCloseTray,IconKind.Minimize,L.T("Крестик сворачивает в трей"),L.T("Выйти — через меню значка в трее"),122,true);
    T(tgNotify,IconKind.Bell,L.T("Уведомлять о сбоях моста"),L.T("Сообщение, если мост перестал работать"),168,false);
@@ -613,7 +613,7 @@ namespace AgDns {
    string target=AutostartHelper.CurrentTarget();
    bool other=target!=null&&!AutostartHelper.SamePath(target,Environment.ProcessPath??"");
    autostartNote.Text=other?L.T("Автозапуск ведёт на другую копию"):"";
-   tgAutostart.Subtitle=other?autostartNote.Text:L.T("Следить за мостом при входе");tgAutostart.SubtitleColor=other?Theme.Amber:Theme.Muted;
+   tgAutostart.Subtitle=other?autostartNote.Text:L.T("Программа следит за состоянием моста");tgAutostart.SubtitleColor=other?Theme.Amber:Theme.Muted;
    if(!string.IsNullOrEmpty(settings.PreviousCopy)&&(!File.Exists(settings.PreviousCopy)||AutostartHelper.SamePath(settings.PreviousCopy,Environment.ProcessPath??""))){settings.PreviousCopy="";settings.Save();}   // gone, or it is this very file: nothing to offer
    prevCopy.Text=L.T("Прежняя копия: ")+settings.PreviousCopy;
    bool show=!string.IsNullOrEmpty(settings.PreviousCopy);
@@ -885,7 +885,7 @@ namespace AgDns {
    var want=isActive?iconOn:iconOff;if(Icon!=want)Icon=want;
    UpdateBenchButtons();
   }
-  // Origin of the addresses the active bridge uses: "pinned" or "found now, DD.MM HH:MM" (1.4-2).
+  // Origin of the addresses the active bridge uses: "pinned" or "found now, DD.MM HH:MM".
   string AddressSourceText(JsonElement status,string template){
    if(!status.TryGetProperty("Servers",out var arr)||arr.ValueKind!=JsonValueKind.Array)return "";
    var active=arr.EnumerateArray().Select(x=>x.GetString()).Where(x=>x!=null).ToList();if(active.Count==0)return "";
@@ -1042,8 +1042,8 @@ namespace AgDns {
    try{
     string pn=p.Custom?null:p.Name;
     string[] servers=p.Servers;AddressPlan plan=null;
-    // 1.4-1: an unelevated, short CIM/WMI pre-check before any UAC prompt; if WMI does not answer nothing is started.
-    // 1.4-2: the address check is read-only network work, so it runs while the WMI check is still going (one wait instead of two).
+    // an unelevated, short CIM/WMI pre-check before any UAC prompt; if WMI does not answer nothing is started.
+    // the address check is read-only network work, so it runs while the WMI check is still going (one wait instead of two).
     Title(()=>action=="enable"?L.T("Проверяю провайдера…"):L.T("Проверяю службу WMI…"));
     var guardTask=Recovery.CheckCimAsync(p.Servers,p.Template,pn,token);
     Task<AddressPlan> planTask=null;
@@ -1052,7 +1052,7 @@ namespace AgDns {
     if(!guard.Allowed&&planTask!=null)_=planTask.ContinueWith(x=>{_=x.Exception;},TaskScheduler.Default);   // nothing is started; the address check just ends on its own
     if(!guard.Allowed){history.Append(action,guard.Code,false,p.Custom?"custom":p.Name);string blocked=Recovery.BlockedJson(action,guard,Recovery.ReadJournal());Log("Проверка WMI: "+guard.Code);LogBlock(blocked);ShowOperationFailure(blocked);return;}
     if(action=="enable"){
-     // 1.4-2: pins are a hint. If none passes preflight (or the profile has none) the provider name is bootstrapped before UAC;
+     // pins are a hint. If none passes preflight (or the profile has none) the provider name is bootstrapped before UAC;
      // no address found = nothing is started and an already working bridge is left alone.
      plan=await planTask;
      if(plan.Error!=null){history.Append(action,plan.Error,false,p.Custom?"custom":p.Name);Log("Адреса провайдера: "+plan.Error+(string.IsNullOrEmpty(plan.Detail)?"":" — "+plan.Detail));ShowFailure(plan.Error,null,geminiAtStart);if(ProviderSwitch.IsTrigger(plan.Error))await OfferAlternativeAsync(p,plan.Error,token);return;}
@@ -1190,7 +1190,7 @@ namespace AgDns {
    // An offer to switch provider belongs to a provider failure. A healthy report (the provider answers again) or a drift that is not about the provider (the rules)
    // makes it stale: it must neither linger nor hide "Починить". A provider-down drift keeps it (the repair has already failed once).
    if(offer!=null&&(r.Kind==HealthKind.Healthy||(r.Kind==HealthKind.Drift&&r.Code!=HealthMonitor.ProviderDown))){offer=null;UpdateButtons();}
-   // The light provider check (1.6-4) knows only about the provider. A healthy light report clears an earlier provider-down drift and nothing else;
+   // The light provider check knows only about the provider. A healthy light report clears an earlier provider-down drift and nothing else;
    // a failing one never replaces a different drift the full check has shown (the repair covers both).
    if(r.Light&&r.Kind==HealthKind.Healthy){
     if(health!=null&&health.Code==HealthMonitor.ProviderDown){lastCheck=r;health=null;lastNotifiedCode=null;if(!string.IsNullOrEmpty(last))Present(last);else{UpdateDetailsText();UpdateButtons();}}
@@ -1256,9 +1256,9 @@ namespace AgDns {
     }
    }
   }
-  // ---- 1.6-3: another provider when the current one has none ----
+  // ---- another provider when the current one has none ----
   // Starts only after the person's own connect/repair failed with "no usable address". Read-only (DoH queries and TLS handshakes of the benchmark kind).
-  // The result is an offer behind a button; the existing bridge is never touched here. Carrying it out = trust dialog + the ordinary enable (1.4-3 switch).
+  // The result is an offer behind a button; the existing bridge is never touched here. Carrying it out = trust dialog + the ordinary enable (compensated profile switch).
   async Task OfferAlternativeAsync(ProfileItem failed,string reason,CancellationToken ct){
    offer=null;Title(()=>L.T("Ищу рабочего провайдера…"));
    Log("Профиль «"+failed.Name+"» не дал рабочих адресов ("+reason+"). Проверяю остальные профили каталога: только чтение, мост не меняется.");

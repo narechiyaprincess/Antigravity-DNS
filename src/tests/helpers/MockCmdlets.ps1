@@ -12,9 +12,9 @@ $script:MockRuleAddCount = 0
 
 # Fault Injection Controls
 $script:MockFailDohAt = 0
-$script:MockFailRemoveRuleAt = 0   # fail the Nth Remove-DnsClientNrptRule call (interrupted restore, 1.4-1)
+$script:MockFailRemoveRuleAt = 0   # fail the Nth Remove-DnsClientNrptRule call (interrupted restore)
 $script:MockRuleRemoveCount = 0
-$script:MockFailDohFrom = 0   # fail every DoH registration from the Nth one onwards (1.4-3 compensation tests)
+$script:MockFailDohFrom = 0   # fail every DoH registration from the Nth one onwards (compensation tests)
 $script:MockFailAfterRule = $false
 $script:MockNetworkFailure = $false
 $script:MockPartialNetworkOnlyOneServer = $false

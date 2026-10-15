@@ -75,9 +75,9 @@ Assert-Condition ($byId['geohide.ru'].template -eq 'https://geohide.ru/dns-query
 
 Assert-Condition (($cat.pending | Where-Object { $_.id -eq 'dns.astracat.ru' -and $_.template -eq 'https://dns.astracat.ru:8443/dns-query' -and $_.reason }) -and -not $byId.ContainsKey('dns.astracat.ru')) 'T5_C05' 'Astracat (:8443) is recorded as pending with a reason, not shipped as an unverified pin' 'R13-CAT'
 
-$p123 = @{ 'dns.malw.link' = '179.254.166.171,164.5.224.81'; 'xbox-dns.ru' = '185.185.185.185,185.185.185.186'; 'dns.comss.one' = '83.220.169.155,195.133.25.16,212.109.195.93' }  # 1.4-2: P3 pins replaced by the bootstrap-validated addresses (2026-10-12)
+$p123 = @{ 'dns.malw.link' = '179.254.166.171,164.5.224.81'; 'xbox-dns.ru' = '185.185.185.185,185.185.185.186'; 'dns.comss.one' = '83.220.169.155,195.133.25.16,212.109.195.93' }  # P3 pins validated by bootstrap on 2026-10-12.
 $pinsKept = $true; foreach ($k in $p123.Keys) { if (($byId[$k].servers -join ',') -ne $p123[$k]) { $pinsKept = $false } }
-Assert-Condition $pinsKept 'T5_C06' 'P1 and P2 pins are unchanged from 1.2.0; P3 carries the addresses validated by bootstrap on 2026-10-12 (1.4-2)' 'R13-CAT'
+Assert-Condition $pinsKept 'T5_C06' 'P1 and P2 pins are unchanged from 1.2.0; P3 carries the addresses validated by bootstrap on 2026-10-12' 'R13-CAT'
 
 $bootstrapped = @('geohide.ru', 'dns.dns-ai.ru', 'dns.bezmezhau.com', 'dns.comss.one') | ForEach-Object { $byId[$_] }
 $provenance = $true

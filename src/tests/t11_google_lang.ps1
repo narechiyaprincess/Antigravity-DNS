@@ -1,4 +1,4 @@
-﻿# t11_google_lang.ps1 - Tier 11: "Весь Google" scope and the English interface (owner's second pass, 2026-10-13), offline only.
+﻿# t11_google_lang.ps1 - Tier 11: "Весь Google" scope and the English interface, offline only.
 # The catalog's Google suffixes (".google.com" ...) are NRPT namespaces; every check (DoH, TLS, Windows answers) still runs on the exact hosts.
 # Engine tests run on mock cmdlets and a scratch directory; nothing contacts a provider or touches NRPT/DoH/adapters/state.json.
 # This file is saved with a BOM: Windows PowerShell 5.1 mangles non-ASCII text in a script without one.

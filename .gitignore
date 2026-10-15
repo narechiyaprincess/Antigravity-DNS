@@ -50,4 +50,3 @@ venv/
 .cache/
 /tmp/
 /temp/
-/.agents/

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace AgDns {
- // UI pass v4 (owner's fourth pass, 2026-10-14): autostart without a question or a copy, the levels applied at once, the profile field with its ping,
+ // UI tests: autostart, immediate scope changes, profile latency,
  // the browser screen (order, one-sentence verdict, «Назад»), the language switched without a restart, the symmetric highlight of the tab bar.
  public static partial class OfflineTests {
   static bool PumpUntil(Func<bool> done,int maxMs=5000){var sw=Stopwatch.StartNew();while(!done()&&sw.ElapsedMilliseconds<maxMs){Application.DoEvents();System.Threading.Thread.Sleep(5);}Application.DoEvents();return done();}
@@ -141,7 +141,7 @@ namespace AgDns {
      Check(!form.AutostartOn&&form.AutostartSubtitle=="Автозапуск ведёт на другую копию"&&!form.PreviousCopyVisible&&AutostartHelper.SamePath(AutostartHelper.CurrentTarget(),other),"autostart window: an entry that names another copy shows the switch off and says so; the window asked nothing and changed nothing when it started");
      var rows0=form.SettingsRows;
      form.ToggleAutostartForTest(true);   // a question here would block the test: there is none
-     Check(form.AutostartOn&&AutostartHelper.IsEnabled(self)&&form.AutostartSubtitle=="Следить за мостом при входе"&&form.PreviousCopyVisible&&form.PreviousCopyText=="Прежняя копия: "+other,"autostart window: turning it on moves the entry to this exe without a word and shows «Прежняя копия: <путь>» under the switch");
+     Check(form.AutostartOn&&AutostartHelper.IsEnabled(self)&&form.AutostartSubtitle=="Программа следит за состоянием моста"&&form.PreviousCopyVisible&&form.PreviousCopyText=="Прежняя копия: "+other,"autostart window: turning it on moves the entry to this exe without a word and shows «Прежняя копия: <путь>» under the switch");
      var rows=form.SettingsRows;float s=form.LayoutScale;int pageH=form.PageHeightOf(2);
      bool apart=rows[1].Bottom<=rows[2].Top+1&&rows[2].Bottom<=rows[3].Top+1&&rows[3].Bottom<=rows[4].Top+1&&rows[4].Bottom<=rows[5].Top+1&&rows[5].Bottom<=rows[0].Bottom&&rows[0].Bottom<=rows[6].Top&&rows[6].Bottom<=pageH&&rows[3].Top>rows0[3].Top&&rows[2].Height>=(int)(30*s);
      Check(apart,"autostart window: the row «Прежняя копия» takes its own room between the switch and the next row; the cards below move down and stay on the page");

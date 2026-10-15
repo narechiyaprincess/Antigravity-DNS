@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace AgDns {
- // Which provider addresses a connect attempt will hand to the (elevated) engine, and where they came from (1.4-2).
+ // Which provider addresses a connect attempt will hand to the (elevated) engine, and where they came from.
  public sealed class AddressPlan {
   public string[] Servers=new string[0];
   public string Source="none";          // "pinned" | "saved" | "found" | "none"
@@ -14,7 +14,7 @@ namespace AgDns {
   public string Detail;
  }
 
- // The last addresses a bootstrap found for one profile (1.6-1). User settings, never the engine's ownership journal.
+ // The last addresses a bootstrap found for one profile. User settings, never the engine's ownership journal.
  public sealed class SavedAddr {
   public string Template="";public string[] Servers=new string[0];public string Utc="";   // Utc: round-trip format, when the addresses were found
  }
@@ -61,7 +61,7 @@ namespace AgDns {
     try{alive=await preflight(pins,template)??new string[0];}catch{alive=new string[0];}
     if(alive.Length>0){plan.Servers=pins;plan.Source="pinned";return plan;}
    }
-   // 1.6-1: the pins are dead (or absent). What the last bootstrap found is tried before the network is asked again, so a bootstrap that fails right now
+   // the pins are dead (or absent). What the last bootstrap found is tried before the network is asked again, so a bootstrap that fails right now
    // (no cross-check reachable, name resolver down) does not cost the connection. Same preflight as for pins; an address that does not pass it is not used.
    var remembered=SavedAddresses.Usable(saved,now()).Except(pins).ToArray();
    if(remembered.Length>0) {

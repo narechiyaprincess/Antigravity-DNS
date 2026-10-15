@@ -54,7 +54,7 @@ function Invoke-Synthetic([string]$Flag, $Scenario, [int]$TimeoutSec = 120) {
 function Join-Set($a) { (@($a) | Sort-Object) -join ',' }
 
 # ==============================================================================
-# A: 1.6-1 - the last working addresses (pins -> saved -> bootstrap)
+# A: the last working addresses (pins -> saved -> bootstrap)
 # ==============================================================================
 $tmpl = 'https://dns.example.test/dns-query'
 $pins = @('193.233.112.67', '193.233.112.68')
@@ -109,7 +109,7 @@ Assert-Condition ($ui -match 'List<SavedAddr> SavedAddrs' -and $main -match 'Sou
 Assert-Condition ((Get-Src 'Engine.ps1') -notmatch 'SavedAddr' -and (Get-Src 'Recovery.cs') -notmatch 'SavedAddr') 'T8_A09' 'The engine journal and the recovery code know nothing about the saved addresses (schema 1 is unchanged)' 'R16-1'
 
 # ==============================================================================
-# B: 1.6-2 - resilient bootstrap (more resolvers, parallel, one 20 s budget)
+# B: resilient bootstrap (more resolvers, parallel, one 20 s budget)
 # ==============================================================================
 $bt = 'https://dns.example.test/dns-query'
 function Silent($via, $server) { [ordered]@{ via = $via; server = $server; code = 'DNS_TIMEOUT_OR_UNREACHABLE'; addresses = @() } }
@@ -166,7 +166,7 @@ Assert-Condition ($probCode -match 'Budget=TimeSpan\.FromSeconds\(20\)' -and $pr
 Assert-Condition ($probCode -notmatch 'SystemQuery|UdpClient|ProtocolType\.Udp') 'T8_B10' 'The bootstrap adds no plain-DNS path (the resolvers are asked only over DoH)' 'R16-2'
 
 # ==============================================================================
-# C: 1.6-3 - when the current provider has no usable address, another working profile is OFFERED (never applied by itself)
+# C: when the current provider has no usable address, another working profile is OFFERED (never applied by itself)
 # ==============================================================================
 function New-A([string]$name, [string]$ip) { [Convert]::ToBase64String((New-SyntheticDnsResponse -QuestionDomain $name -QuestionType 1 -Id 1234 -AnswerRecords @((New-ARecord $name $ip)))) }
 function New-AMulti([string]$name, [string[]]$ips) { [Convert]::ToBase64String((New-SyntheticDnsResponse -QuestionDomain $name -QuestionType 1 -Id 1234 -AnswerRecords @($ips | ForEach-Object { New-ARecord $name $_ }))) }
@@ -230,14 +230,14 @@ if ($haveExe) {
 
 # C10: contracts of the window code
 $mainRaw = Get-Src 'MainForm.cs'
-$ri = $mainRaw.IndexOf('// ---- 1.6-3: another provider when the current one has none'); $rj = $mainRaw.IndexOf('// Smoke only: renders the preview dialog')
+$ri = $mainRaw.IndexOf('// ---- another provider when the current one has none'); $rj = $mainRaw.IndexOf('// Smoke only: renders the preview dialog')
 $region = if ($ri -ge 0 -and $rj -gt $ri) { $mainRaw.Substring($ri, $rj - $ri) } else { '' }
 $oi = $region.IndexOf('async Task OfferAlternativeAsync'); $si = $region.IndexOf('async Task SwitchToOfferedAsync')
 $offerBlock = if ($oi -ge 0 -and $si -gt $oi) { $region.Substring($oi, $si - $oi) } else { '' }
 $switchBlock = if ($si -ge 0) { $region.Substring($si) } else { '' }
 Assert-Condition ($offerBlock.Length -gt 400 -and $offerBlock -notmatch 'Elevate\(' -and $offerBlock -notmatch 'Mutate\(' -and $offerBlock -notmatch '"restore"|"enable"' -and $offerBlock -notmatch 'SetSelectedSilently|settings\.Profile' -and $offerBlock -notmatch 'Engine\(') 'T8_C10' 'The search for another provider only reads (no elevation, no engine call, no restore) and does not change the selected profile' 'R16-3' -FailureMessage ("len " + $offerBlock.Length)
 $ap = $switchBlock.IndexOf('ProviderSwitch.ApplyAsync'); $sel = $switchBlock.IndexOf('SetSelectedSilently'); $mut = $switchBlock.IndexOf('Mutate("enable")')
-Assert-Condition ($ap -ge 0 -and $switchBlock -match 'ApplyAsync\(o,id=>EnsureTrust\(profiles\[i\]\)' -and $sel -gt $ap -and $mut -gt $sel -and $switchBlock -notmatch 'Elevate\(' -and $switchBlock -notmatch '"restore"') 'T8_C11' 'A switch goes through ApplyAsync: the trust dialog first, then the profile is selected and the ordinary Mutate("enable") (the 1.4-3 switch path) runs' 'R16-3' -FailureMessage "ap=$ap sel=$sel mut=$mut"
+Assert-Condition ($ap -ge 0 -and $switchBlock -match 'ApplyAsync\(o,id=>EnsureTrust\(profiles\[i\]\)' -and $sel -gt $ap -and $mut -gt $sel -and $switchBlock -notmatch 'Elevate\(' -and $switchBlock -notmatch '"restore"') 'T8_C11' 'A switch goes through ApplyAsync: the trust dialog first, then the profile is selected and the ordinary Mutate("enable") (compensated profile switch) runs' 'R16-3' -FailureMessage "ap=$ap sel=$sel mut=$mut"
 $mainCode = Get-Code 'MainForm.cs'
 Assert-Condition (([regex]::Matches($mainCode, 'OfferAlternativeAsync\(p,')).Count -eq 2 -and ([regex]::Matches($mainCode, 'SwitchToOfferedAsync\(\)')).Count -eq 2 -and $mainCode -match 'ProviderSwitch\.IsTrigger\(plan\.Error\)' -and $mainCode -match 'ProviderSwitch\.IsTrigger\(CodeOfOutput\(result\.Output\)\)') 'T8_C12' 'The search starts only from the two failure paths of the person''s own connect/repair; the switch only from its button' 'R16-3'
 $mh = $mainRaw.IndexOf('// ---- 1.5-1: health check in the tray'); $mh2 = $mainRaw.IndexOf('// ---- 1.5-2: support report')
@@ -254,7 +254,7 @@ $unknown = @($scan | Sort-Object -Unique | Where-Object { $knownCodes -notcontai
 Assert-Condition ($haveExe -and $unknown.Count -eq 0 -and $scan.Count -ge 5) 'T8_C15' 'Every message code literal in Switch.cs, Connect.cs and Probing.cs has a message table entry' 'R16-3' -FailureMessage ($unknown -join ', ')
 
 # ==============================================================================
-# D: 1.6-4 - quick provider check every 10 minutes (no engine, no CIM); Suspect -> Drift unchanged; the full check stays at 45 minutes
+# D: quick provider check every 10 minutes (no engine, no CIM); Suspect -> Drift unchanged; the full check stays at 45 minutes
 # ==============================================================================
 $activeJournal = [ordered]@{ Schema = 1; Phase = 'Active'; Servers = @('212.109.195.91', '83.220.169.155', '10.0.0.7'); Template = 'https://x.example.test/dns-query' }
 function Invoke-Health($Journal, [string]$Provider, $Steps) { Invoke-Synthetic '--health-synthetic' ([ordered]@{ journal = $Journal; provider = $Provider; steps = @($Steps) }) }
@@ -320,8 +320,8 @@ $tickText = if ($tickIdx -ge 0 -and $tickEnd -gt $tickIdx) { $mainRaw2.Substring
 Assert-Condition ($tickText -match 'TryStart' -and $tickText -match 'busy' -and $tickText -match 'benchRunning' -and $tickText -notmatch 'Mutate\(|Elevate\(') 'T8_D10' 'The light check runs through the same guarded tick as the full one (not during an operation or the benchmark, never a repair by itself)' 'R16-4'
 
 # ==============================================================================
-# E: 1.6-5 - automatic repair without UAC stays a design only: no product code for it
+# E: No unattended privileged repair or background service.
 # ==============================================================================
 $srcAll = ''
 foreach ($f in Get-ChildItem -LiteralPath $sourceRoot -File | Where-Object { $_.Extension -in '.cs', '.ps1' }) { $srcAll += (Get-Content -LiteralPath $f.FullName -Raw -Encoding UTF8) }
-Assert-Condition ($srcAll -notmatch '--auto-repair' -and $srcAll -notmatch 'ITaskService|ServiceBase|CreateService|sc\.exe\s+create') 'T8_E02' 'No code for automatic repair, a scheduled task or a service exists yet (the decision belongs to the owner after the document)' 'R16-5'
+Assert-Condition ($srcAll -notmatch '--auto-repair' -and $srcAll -notmatch 'ITaskService|ServiceBase|CreateService|sc\.exe\s+create') 'T8_E02' 'No unattended repair command, scheduled task or Windows service is installed' 'R16-5'

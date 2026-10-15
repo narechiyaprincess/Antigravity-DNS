@@ -31,7 +31,7 @@ namespace AgDns {
    Check(cat.Pending.Any(p=>p.Id=="dns.astracat.ru"&&p.Template.Contains(":8443/")&&!string.IsNullOrWhiteSpace(p.Reason))&&cat.Find("dns.astracat.ru")==null,"catalog: Astracat stays pending with a recorded reason until an IP is verified");
    string good="{\"schema\":1,\"default\":\"a.test\",\"targets\":[\"one.example.test\",\"two.example.test\"],\"version\":\"t\",\"profiles\":[{\"id\":\"a.test\",\"slot\":\"P1\",\"template\":\"https://a.test/dns-query\",\"servers\":[\"193.233.112.67\"]}]}";
    Check(ProfileCatalog.Parse(good).Profiles.Length==1,"catalog: minimal valid document parses");
-   Check(cat.Targets.Length==2&&cat.Targets.All(h=>h.EndsWith(".googleapis.com"))&&Program.Targets.SequenceEqual(cat.Targets)&&Program.Target==cat.Targets[0]&&cat.DefaultProfile!=null&&Program.Servers.SequenceEqual(cat.DefaultProfile.Servers)&&Program.DefaultTemplate==cat.DefaultProfile.Template,"catalog: protected domains and the default profile are read from profiles.json only (1.4-6)");
+   Check(cat.Targets.Length==2&&cat.Targets.All(h=>h.EndsWith(".googleapis.com"))&&Program.Targets.SequenceEqual(cat.Targets)&&Program.Target==cat.Targets[0]&&cat.DefaultProfile!=null&&Program.Servers.SequenceEqual(cat.DefaultProfile.Servers)&&Program.DefaultTemplate==cat.DefaultProfile.Template,"catalog: protected domains and the default profile are read from profiles.json only");
    Reject(()=>ProfileCatalog.Parse(good.Replace("\"default\":\"a.test\",","")),"catalog: a catalog without a default profile is rejected");
    Reject(()=>ProfileCatalog.Parse(good.Replace("\"default\":\"a.test\"","\"default\":\"nope.test\"")),"catalog: an unknown default profile is rejected");
    Reject(()=>ProfileCatalog.Parse(good.Replace("\"targets\":[\"one.example.test\",\"two.example.test\"],","")),"catalog: a catalog without target domains is rejected");
@@ -82,7 +82,7 @@ namespace AgDns {
    try {
     Directory.CreateDirectory(dir);
     string src=Path.Combine(dir,"src.exe");File.WriteAllBytes(src,Enumerable.Range(0,4096).Select(i=>(byte)(i*7)).ToArray());
-    // autostart (owner's fourth pass): no question and no copy; it names the running exe; only a file that exists and is this program's is ever offered for deletion
+    // autostart: no question and no copy; it names the running exe; only a file that exists and is this program's is ever offered for deletion
     const string isoKey=@"Software\AgDnsTest\RunInstall";string realKey=AutostartHelper.KeyName;
     Microsoft.Win32.Registry.CurrentUser.CreateSubKey(isoKey).Dispose();AutostartHelper.KeyName=isoKey;
     try {
@@ -205,7 +205,7 @@ namespace AgDns {
    }finally{Benchmark.HistoryPath=histOld;try{Directory.Delete(Path.GetDirectoryName(histTmp),true);}catch{}}
   }
 
-  // ---- plain messages and one action per code (1.4-5) ----
+  // ---- plain messages and one action per code ----
   static void RunMessageTests() {
    var all=CodeTable.All.ToList();
    Check(all.Count>=40&&all.All(i=>!string.IsNullOrWhiteSpace(i.Title)&&!string.IsNullOrWhiteSpace(i.Text)&&!string.IsNullOrWhiteSpace(i.Action)),"messages: every table entry has a title, a text and an action");
@@ -214,11 +214,11 @@ namespace AgDns {
    Check(CodeTable.Lookup("APPLY_FAILED_ROLLED_BACK: DOH_ADD_VERIFICATION_FAILED").Code=="APPLY_FAILED_ROLLED_BACK"&&CodeTable.Lookup("NRPT_NOT_EFFECTIVE: Windows resolver differs").Code=="NRPT_NOT_EFFECTIVE"&&CodeTable.TokenOf("STATE_INVALID: journal unreadable")=="STATE_INVALID","messages: only the leading code token of an engine message selects the entry");
    var unknown=CodeTable.Lookup("SOMETHING_NEW: x");var empty=CodeTable.Lookup("");var native=CodeTable.Lookup("Cannot validate argument on parameter");
    Check(unknown.Kind==ActionKind.Details&&!string.IsNullOrWhiteSpace(unknown.Text)&&empty.Kind==ActionKind.Details&&native.Kind==ActionKind.Details&&!CodeTable.Known("SOMETHING_NEW")&&CodeTable.Known("WMI_NOT_RESPONDING: x"),"messages: an unknown code still gets a sentence and the Details action");
-   Check(new[]{"NRPT_OR_HOSTS_CONFLICT","DOH_NO_VALIDATED_ENDPOINT","ENGINE_TIMEOUT","ELEVATION_TIMEOUT","UAC_CANCELLED","RECOVERY_REQUIRED","RESTORE_UNCONFIRMED","WMI_NOT_RESPONDING","BOOTSTRAP_FAILED","BOOTSTRAP_NO_ADDRESS","PROFILE_SWITCH_FAILED_PREVIOUS_RESTORED"}.All(CodeTable.Known),"messages: the codes named in the roadmap are all covered");
-   Check(CodeTable.Lookup("RECOVERY_REQUIRED").Title=="Требуется восстановление"&&CodeTable.Lookup("WMI_NOT_RESPONDING").Text.Contains("изменения не начаты"),"messages: recovery state title and the WMI wording match the roadmap");
+   Check(new[]{"NRPT_OR_HOSTS_CONFLICT","DOH_NO_VALIDATED_ENDPOINT","ENGINE_TIMEOUT","ELEVATION_TIMEOUT","UAC_CANCELLED","RECOVERY_REQUIRED","RESTORE_UNCONFIRMED","WMI_NOT_RESPONDING","BOOTSTRAP_FAILED","BOOTSTRAP_NO_ADDRESS","PROFILE_SWITCH_FAILED_PREVIOUS_RESTORED"}.All(CodeTable.Known),"messages: operation error codes have messages");
+   Check(CodeTable.Lookup("RECOVERY_REQUIRED").Title=="Требуется восстановление"&&CodeTable.Lookup("WMI_NOT_RESPONDING").Text.Contains("изменения не начаты"),"messages: recovery and WMI messages describe the required action");
   }
 
-  // ---- text fits its place in the window (night polish): measured with pixel fonts at 96/120/144/192 dpi, so the check does not depend on the screen of the machine ----
+  // ---- text fits its place in the window: measured with pixel fonts at 96/120/144/192 dpi, so the check does not depend on the screen of the machine ----
   static int TextHeight(string text,string family,float pt,float dpi,int widthUnits){
    using(var f=new Font(family,pt*dpi/72f,GraphicsUnit.Pixel))return TextRenderer.MeasureText(text,f,new Size((int)Math.Round(widthUnits*dpi/96f),int.MaxValue/4),TextFormatFlags.WordBreak|TextFormatFlags.NoPadding).Height;
   }
@@ -342,7 +342,7 @@ namespace AgDns {
    }
   }
 
-  // ---- final UI pass (2026-10-13): a quiet main page with the ping of the bridge, settings in order of use, info page, icons, version 1.0 ----
+  // ---- main page, bridge latency, settings, info page, icons and version display ----
   sealed class FakeSpeedProbe:ISpeedProbe {
    public Func<string,Reply> Answer=s=>new Reply{Addresses=new[]{"157.22.177.90"}};
    public readonly Queue<TlsInfo> Replies=new Queue<TlsInfo>();public int DohCalls,TlsCalls;public readonly List<string> TlsTo=new List<string>();
@@ -490,7 +490,7 @@ namespace AgDns {
    }
   }
 
-  // ---- all of Google, the scope selector, English, the Telegram mark (owner's second pass 2026-10-13) ----
+  // ---- all of Google, the scope selector, English, the Telegram mark ----
   static readonly System.Text.RegularExpressions.Regex Cyr=new System.Text.RegularExpressions.Regex("[А-Яа-яЁё]");
   static void RunScopeLangTests() {
    var cat=ProfileCatalog.BuiltIn;
@@ -624,7 +624,7 @@ namespace AgDns {
    }
   }
 
-  // ---- restore that cannot hang silently (1.4-1, offline part): manual instruction from the journal, text only ----
+  // ---- restore that cannot hang silently: manual instruction from the journal, text only ----
   static void RunRecoveryTests() {
    string owner=new string('a',32),g1="{82c33f7e-1111-4222-8333-444455556666}",g2="{a99b6302-aaaa-4bbb-8ccc-ddddeeeeffff}";
    string journal="{\"Schema\":1,\"Owner\":\""+owner+"\",\"Phase\":\"Restoring\",\"Targets\":[\"one.example.test\",\"two.example.test\"],\"Servers\":[\"179.254.166.171\",\"164.5.224.81\"],"+
@@ -727,7 +727,7 @@ namespace AgDns {
    // monitor: what is checked, in which order, and what it never does
    var p=HealthyProbe(o);var m=new HealthMonitor(p,o);var r=Hc(m);
    Check(r.Kind==HealthKind.Healthy&&r.Code==HealthMonitor.Ok&&!r.CanFix&&p.StatusCalls==1&&p.LastDeadline==o.CimDeadline&&p.ProviderCalls==1&&p.SystemCalls==2,"health: rules, DoH and the Windows resolver all fine -> Healthy; CIM is asked once, with the short deadline");
-   Check(o.CimDeadline<=TimeSpan.FromSeconds(20)&&o.Period>=TimeSpan.FromMinutes(30)&&o.Period<=TimeSpan.FromMinutes(60)&&o.MinInterval>=TimeSpan.FromSeconds(60),"health: options match the roadmap (short CIM deadline, 30-60 minute period, at most one check per minute)");
+   Check(o.CimDeadline<=TimeSpan.FromSeconds(20)&&o.Period>=TimeSpan.FromMinutes(30)&&o.Period<=TimeSpan.FromMinutes(60)&&o.MinInterval>=TimeSpan.FromSeconds(60),"health: short CIM deadline, 30-60 minute period, at most one check per minute");
    foreach(string j in new[]{null,"","{ not json","{\"Phase\":\"Restored\"}"}) {
     var pj=HealthyProbe(o);pj.JournalText=j;var rj=Hc(new HealthMonitor(pj,o));
     Check(rj.Kind==HealthKind.Off&&!rj.CanFix&&pj.StatusCalls==0&&pj.ProviderCalls==0&&pj.SystemCalls==0,"health: no journal or a switched-off bridge -> Off, with no CIM and no network at all ("+(j??"null")+")");
@@ -864,7 +864,7 @@ namespace AgDns {
 
   // ---- 1.5-2: support report ----
   static RedactionContext Ctx()=>new RedactionContext{UserName="ivan",MachineName="DESKTOP-IVAN01",DomainName="DESKTOP-IVAN01",ProfileDir=@"C:\Users\ivan",ExtraPaths=new[]{@"D:\Docs\ivan-docs"},Ssids=new[]{"HomeWiFi-5G","Café 5G"}};
-  // ---- quick provider check every 10 minutes (1.6-4): no engine, no CIM; Suspect -> Drift unchanged; the full check stays at 45 minutes ----
+  // ---- quick provider check every 10 minutes: no engine, no CIM; Suspect -> Drift unchanged; the full check stays at 45 minutes ----
   static void RunLightHealthTests() {
    var o=new HealthOptions{Targets=new[]{"a.example.test","b.example.test"}};
    const string ActiveJournal="{\"Schema\":1,\"Phase\":\"Active\",\"Servers\":[\"212.109.195.91\",\"83.220.169.155\",\"10.0.0.7\"],\"Template\":\"https://x.example.test/dns-query\"}";
@@ -1014,7 +1014,7 @@ namespace AgDns {
    }
   }
 
-  // ---- addresses without manual upkeep (1.4-2): bootstrap at connect time ----
+  // ---- addresses without manual upkeep: bootstrap at connect time ----
   static T Sync<T>(Func<System.Threading.Tasks.Task<T>> f)=>System.Threading.Tasks.Task.Run(f).GetAwaiter().GetResult();
   sealed class FakeBootstrapNet:IBootstrapNet {
    public string[] SysIps=new string[0];public CrossResult[] Cross=new CrossResult[0];public HashSet<string> TlsOk=new HashSet<string>();public bool CrossThrows,SysThrows,CrossHang,DohHang;public string[] DohAsked=new string[0];public HashSet<string> DohOk=new HashSet<string>();
@@ -1061,7 +1061,7 @@ namespace AgDns {
    Check(!MainForm.TryParseCustom("","10.0.0.1","https://dns.example.test/dns-query",out _,out _,out _,out _)&&!MainForm.TryParseCustom("","","https://1.2.3.4/dns-query",out _,out _,out _,out _)&&!MainForm.TryParseCustom("","","http://dns.example.test/dns-query",out _,out _,out _,out _),"custom profile: private IPs, IP-literal hosts and plain http are rejected");
   }
 
-  // ---- resilient bootstrap (1.6-2): more resolvers, parallel, one budget ----
+  // ---- resilient bootstrap: more resolvers, parallel, one budget ----
   static void RunResilientBootstrapTests() {
    const string tmpl="https://dns.example.test/dns-query";
    var fast=new BootstrapOptions{Budget=TimeSpan.FromMilliseconds(900),Discovery=TimeSpan.FromMilliseconds(300)};
@@ -1112,7 +1112,7 @@ namespace AgDns {
    Check(ProfileCatalog.BuiltIn.Profiles.All(p=>p.Servers.Take(LiveBootstrapNet.PinsPerCatalogProvider).All(ip=>catalogOnly.Any(r=>r.Server==ip))),"resolvers: every catalog provider is represented by up to two pins");
   }
 
-  // ---- last working addresses (1.6-1): pins -> saved (not older than 30 days, same preflight) -> bootstrap ----
+  // ---- last working addresses: pins -> saved (not older than 30 days, same preflight) -> bootstrap ----
   static void RunSavedAddressTests() {
    const string tmpl="https://dns.example.test/dns-query";
    var pins=new[]{"193.233.112.67","193.233.112.68"};var savedIps=new[]{"83.220.169.155","195.133.25.16","212.109.195.93"};
@@ -1166,7 +1166,7 @@ namespace AgDns {
    Check(back.SavedAddrs.Count==1&&back.SavedAddrs[0].Servers.SequenceEqual(savedIps)&&SavedAddresses.FoundAt(back.SavedAddrs[0])==now&&JsonSerializer.Deserialize<AppSettings>("{\"SavedAddrs\":null}",Program.JsonOptions)!=null,"saved store: survives the settings file round trip");
   }
 
-  // ---- honest best-profile choice (1.4-4) ----
+  // ---- best-profile selection ----
   static object OkMulti(string host,int ms,string[] ips)=>new{ms,packet=Convert.ToBase64String(MakePacket(host,1234,b=>{foreach(string ip in ips)AppendARr(b,host,ip);},(ushort)ips.Length))};
   static Dictionary<string,object> ProfX(string id,string[] servers,object[] q1,object[] q2,Dictionary<string,bool> answerTls=null,bool experimental=false)=>new Dictionary<string,object>{["id"]=id,["template"]="https://"+id+".test/dns-query",["servers"]=servers,["tls"]=new object[]{new{ok=true,ms=40}},["queries"]=new Dictionary<string,object[]>{[Program.Targets[0]]=q1,[Program.Targets[1]]=q2},["answerTls"]=answerTls??new Dictionary<string,bool>(),["experimental"]=experimental};
   static void RunBestChoiceTests() {
@@ -1191,7 +1191,7 @@ namespace AgDns {
    Check(ProfileCatalog.BuiltIn.Profiles.Where(p=>p.Experimental).Select(p=>p.Slot).OrderBy(x=>x).SequenceEqual(new[]{"P2","P5"}),"catalog: P2 and P5 carry the experimental flag, nothing else does");
   }
 
-  // ---- switch to a working provider (1.6-3): offered, never silent, trust first, experimental never offered ----
+  // ---- switch to a working provider: offered, never silent, trust first, experimental never offered ----
   static void RunSwitchTests() {
    string d1=Program.Targets[0],d2=Program.Targets[1];
    var sv=new[]{"193.233.112.67","193.233.112.68"};
@@ -1329,7 +1329,7 @@ namespace AgDns {
    var foreign=new List<byte>(Wire.Query(host,1,1234));foreign[2]=129;foreign[3]=128;foreign[7]=1;foreign.AddRange(new byte[]{4,101,118,105,108,0,0,1,0,1,0,0,0,1,0,4,1,2,3,4});
    Check(Wire.Parse(foreign.ToArray(),host,1,1234).Addresses.Length==0,"unrelated answer owner ignored");
 
-   // Defect F07: CNAME & A record ordering and multi-hop resolution
+   // CNAME & A record ordering and multi-hop resolution
    var cnameFirst=MakePacket(host,1234,b=>{AppendCnameRr(b,host,"canonical.example.com");AppendARr(b,"canonical.example.com","1.2.3.4");},2);
    var repCnameFirst=Wire.Parse(cnameFirst,host,1,1234);
    Check(repCnameFirst.Code=="DNS_OK"&&repCnameFirst.Addresses.Single()=="1.2.3.4"&&repCnameFirst.Cnames.Single()=="canonical.example.com","CNAME-first answer resolved");
@@ -1356,7 +1356,7 @@ namespace AgDns {
    var repExceeded9=Wire.Parse(exceeded9,host,1,1234);
    Check(repExceeded9.Code=="DNS_NODATA"&&repExceeded9.Addresses.Length==0,"9-hop CNAME chain exceeds limit and yields DNS_NODATA");
 
-   // Defect F05: IPv6 public address validation & bogon rejection
+   // IPv6 public address validation & bogon rejection
    Check(Program.PublicIp("2a12:bec4:1bb0:2a30::2")&&Program.PublicIp("2606:4700:4700::1111")&&Program.PublicIp("2001:4860:4860::8888"),"IPv6 public address validation");
    Check(!Program.PublicIp("::1")&&!Program.PublicIp("::")&&!Program.PublicIp("fd00::1")&&!Program.PublicIp("fc00::1")&&!Program.PublicIp("fe80::1")&&!Program.PublicIp("fec0::1")&&!Program.PublicIp("ff02::1")&&!Program.PublicIp("2001:db8::1")&&!Program.PublicIp("::ffff:127.0.0.1"),"IPv6 bogon rejection");
 
@@ -1378,7 +1378,7 @@ namespace AgDns {
    var parsedAAAA=Wire.Parse(bMixed28.ToArray(),host,28,4322);
    Check(parsedAAAA.Addresses.Length==1&&parsedAAAA.Addresses[0]=="2606:4700::1111","mixed packet parses only Type 28 AAAA record");
 
-   // Defect F03: CLI Argument Parsing and Validation
+   // CLI Argument Parsing and Validation
    var pNet=Program.ParseNetworkArgs(new[]{"--network","--servers","185.185.185.185,185.185.185.186","--template","https://xbox-dns.ru/dns-query"});
    Check(pNet.Servers!=null&&pNet.Servers.Length==2&&pNet.Servers[0]=="185.185.185.185"&&pNet.Servers[1]=="185.185.185.186"&&pNet.Template=="https://xbox-dns.ru/dns-query","CLI parses custom IPv4 servers and template");
 
@@ -1391,7 +1391,7 @@ namespace AgDns {
    var pProfOvr=Program.ParseNetworkArgs(new[]{"--network","--profile","P2","--template","https://custom.test/dns-query"});
    Check(pProfOvr.Template=="https://custom.test/dns-query"&&pProfOvr.Servers.Contains("185.185.185.185"),"CLI profile allows explicit template override");
 
-   // Defect F03: Argument Rejection on Invalid Inputs
+   // Argument Rejection on Invalid Inputs
    Reject(()=>Program.ParseNetworkArgs(new[]{"--network","--servers"}),"missing value for --servers");
    Reject(()=>Program.ParseNetworkArgs(new[]{"--network","--servers",""}),"empty --servers string");
    Reject(()=>Program.ParseNetworkArgs(new[]{"--network","--servers","invalid_ip"}),"invalid IP in --servers");
@@ -1403,7 +1403,7 @@ namespace AgDns {
    Reject(()=>Program.ParseNetworkArgs(new[]{"--network","--profile"}),"missing value for --profile");
    Reject(()=>Program.ParseNetworkArgs(new[]{"--network","--profile","NonexistentProfile"}),"unknown profile name");
 
-   // Defect F08: Process Execution Timeout and Cancellation
+   // Process Execution Timeout and Cancellation
    {
     var sw=Stopwatch.StartNew();
     using var cts=new CancellationTokenSource();
@@ -1439,7 +1439,7 @@ namespace AgDns {
     Check(timedOut&&sw.ElapsedMilliseconds<2500&&p.HasExited,"Process execution terminates and kills process tree on deadline expiry");
    }
 
-   // Defect F08: Non-Blocking Form Closing Behavior
+   // Non-Blocking Form Closing Behavior
    {
     using(var form=new MainForm(true)){
      form.Show();
@@ -1452,7 +1452,7 @@ namespace AgDns {
     }
    }
 
-   // Stage S6: Autostart Configuration and Non-Elevated Behavior (isolated registry key; user's real Run entry is never touched)
+   // Autostart Configuration and Non-Elevated Behavior (isolated registry key; user's real Run entry is never touched)
    string realKey=AutostartHelper.KeyName;const string isoKey=@"Software\AgDnsTest\Run";
    Microsoft.Win32.Registry.CurrentUser.CreateSubKey(isoKey).Dispose();AutostartHelper.KeyName=isoKey;
    try {
