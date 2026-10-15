@@ -1,0 +1,59 @@
+{
+  "profiles": {
+    "P1": {
+      "id": "P1",
+      "name": "dns.malw.link",
+      "servers": ["179.254.166.171", "164.5.224.81"],
+      "template": "https://dns.malw.link/dns-query",
+      "targets": ["daily-cloudcode-pa.googleapis.com", "generativelanguage.googleapis.com"],
+      "protocol": "DoH",
+      "allowFallbackToUdp": false,
+      "autoUpgrade": true
+    },
+    "P2": {
+      "id": "P2",
+      "name": "xbox-dns.ru",
+      "servers": ["185.185.185.185", "185.185.185.186"],
+      "template": "https://xbox-dns.ru/dns-query",
+      "targets": ["daily-cloudcode-pa.googleapis.com", "generativelanguage.googleapis.com"],
+      "protocol": "DoH",
+      "allowFallbackToUdp": false,
+      "autoUpgrade": true
+    },
+    "P3": {
+      "id": "P3",
+      "name": "dns.comss.one",
+      "servers": ["92.223.109.31", "92.38.150.150"],
+      "template": "https://dns.comss.one/dns-query",
+      "targets": ["daily-cloudcode-pa.googleapis.com", "generativelanguage.googleapis.com"],
+      "protocol": "DoH",
+      "allowFallbackToUdp": false,
+      "autoUpgrade": true
+    },
+    "IPv6_DualStack": {
+      "id": "IPv6_DualStack",
+      "name": "dualstack.test",
+      "servers": ["2606:4700:4700::1111", "1.1.1.1"],
+      "template": "https://dualstack.test/dns-query",
+      "targets": ["daily-cloudcode-pa.googleapis.com", "generativelanguage.googleapis.com"],
+      "protocol": "DoH",
+      "allowFallbackToUdp": false,
+      "autoUpgrade": true
+    },
+    "Invalid_UrlScheme": {
+      "id": "Invalid_UrlScheme",
+      "name": "insecure-http",
+      "servers": ["1.1.1.1"],
+      "template": "http://insecure.test/dns-query",
+      "targets": ["daily-cloudcode-pa.googleapis.com"],
+      "protocol": "DoH"
+    },
+    "Empty_Servers": {
+      "id": "Empty_Servers",
+      "name": "empty-servers",
+      "servers": [],
+      "template": "https://dns.malw.link/dns-query",
+      "targets": ["daily-cloudcode-pa.googleapis.com"]
+    }
+  }
+}

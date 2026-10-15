@@ -1,0 +1,27 @@
+name: Ошибка / Bug report
+description: Воспроизводимая проблема с мостом, замером или интерфейсом.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Опишите проблему на русском или английском. Не публикуйте токены, приватные DoH URL, сырые настройки и журналы. Отчёт поддержки сначала проверьте в предпросмотре.
+  - type: input
+    id: environment
+    attributes:
+      label: Версия приложения и Windows / App and Windows version
+      placeholder: "1.0.0; Windows 11 x64, build ..."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Шаги, ожидание и результат / Steps, expected and actual result
+      description: Укажите профиль и область, код ошибки, наличие VPN/TUN и собственного DNS браузера. Частные адреса не нужны.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Проверенный отчёт или снимок / Reviewed report or screenshot
+      description: Необязательно. Удалите персональные данные; не прикладывайте state.json или settings.json.

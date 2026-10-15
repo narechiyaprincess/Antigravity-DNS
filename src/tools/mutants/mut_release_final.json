@@ -1,0 +1,8 @@
+[
+  {"name": "rf_modpath_env", "tier": "14", "file": "Program.cs",
+   "old": "public static ProcessStartInfo SystemModulesOnly(ProcessStartInfo info){info.Environment[\"PSModulePath\"]=SystemModulePath;return info;}",
+   "new": "public static ProcessStartInfo SystemModulesOnly(ProcessStartInfo info){return info;}"},
+  {"name": "rf_repoint_root", "tier": "14", "file": "Program.cs",
+   "old": "    if(string.IsNullOrEmpty(root)||!Directory.Exists(root))return false;\n",
+   "new": ""}
+]

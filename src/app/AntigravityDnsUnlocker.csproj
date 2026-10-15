@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AssemblyName>AntigravityDnsUnlocker</AssemblyName>
+    <Version>1.0.0</Version>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- Size 52 MB -> ~25 MB at the same start-up speed: trimming removes unused .NET and WinForms code, ReadyToRun precompiles what is left
+         (trimmed assemblies lose Microsoft's precompiled code, and without it every start JIT-compiles; measured +0.3..0.7 s).
+         This app's own assembly is kept whole (TrimmerRootAssembly: the JSON types are built by reflection). Microsoft does not support
+         trimming for WinForms, so the switches below keep what a trimmed build turns off by default (reflection-based JSON, built-in COM),
+         the whole test suite runs on the trimmed exe, and the exe's ui-surfaces check opens the tray menu, message box, save dialog and clipboard for real. -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <_SuppressWinFormsTrimError>true</_SuppressWinFormsTrimError>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon Condition="Exists('app.ico')">app.ico</ApplicationIcon>
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**</DefaultItemExcludes>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The engine scripts and the provider catalog live inside the exe; ScriptStore stages them with an ACL and SHA-256 check. -->
+    <EmbeddedResource Include="Engine.ps1" LogicalName="Engine.ps1" />
+    <EmbeddedResource Include="Integration.ps1" LogicalName="Integration.ps1" />
+    <EmbeddedResource Include="EmergencyRestore.ps1" LogicalName="EmergencyRestore.ps1" />
+    <EmbeddedResource Include="profiles.json" LogicalName="profiles.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="AntigravityDnsUnlocker" />
+  </ItemGroup>
+</Project>

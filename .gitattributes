@@ -1,0 +1,17 @@
+* text=auto
+/.gitattributes text eol=lf
+/.gitignore text eol=lf
+/LICENSE text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.cs text eol=lf
+*.csproj text eol=lf
+*.py text eol=lf
+# Preserve existing UTF-8 BOMs for Windows PowerShell 5.1.
+*.ps1 text eol=crlf
+*.psm1 text eol=crlf
+*.psd1 text eol=crlf
+*.png binary
+*.ico binary

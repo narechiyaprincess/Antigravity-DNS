@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "default": "dns.malw.link",
+  "targets": ["daily-cloudcode-pa.googleapis.com", "generativelanguage.googleapis.com"],
+  "geminiTargets": ["gemini.google.com", "geminiweb-pa.clients6.google.com"],
+  "googleTargets": [".google.com", ".googleapis.com", ".gstatic.com", ".googleusercontent.com", ".google"],
+  "version": "2026.10.13.1",
+  "updated": "2026-10-13",
+  "policy": "A server IP is pinned only after: (1) the host name resolved identically by the system resolver and public DoH cross-checks, (2) TLS on the provider NAME validated with the default certificate chain, (3) an RFC 8484 DoH query was answered. Enabling the bridge still runs the full preflight (DoH + TLS to the answer IP for both Google domains) and refuses on failure.",
+  "profiles": [
+    {
+      "id": "dns.malw.link", "slot": "P1", "aliases": [],
+      "template": "https://dns.malw.link/dns-query",
+      "servers": ["179.254.166.171", "164.5.224.81"],
+      "origin": "release 1.0.0"
+    },
+    {
+      "id": "xbox-dns.ru", "slot": "P2", "aliases": [],
+      "template": "https://xbox-dns.ru/dns-query",
+      "servers": ["185.185.185.185", "185.185.185.186"],
+      "origin": "release 1.0.0",
+      "experimental": true,
+      "note": "Проверка 2026-10-11: оба закреплённых адреса сбрасывают TCP-соединения из тестовой сети. Имя хоста теперь указывает на другие адреса: они проходят TLS по имени, но DoH для обоих доменов Google на них не прошёл, поэтому замены нет. Адреса оставлены как были."
+    },
+    {
+      "id": "dns.comss.one", "slot": "P3", "aliases": [],
+      "template": "https://dns.comss.one/dns-query",
+      "servers": ["83.220.169.155", "195.133.25.16", "212.109.195.93"],
+      "origin": "release 1.0.0; pins replaced by bootstrap 2026-10-12",
+      "bootstrap": {
+        "date": "2026-10-12",
+        "resolved": ["195.133.25.16", "83.220.169.155", "212.109.195.93"],
+        "crossCheck": "system resolver, 1.1.1.1, 8.8.8.8 and 9.9.9.9 returned the same three addresses",
+        "pinned": ["83.220.169.155", "195.133.25.16", "212.109.195.93"],
+        "excluded": [],
+        "tls": "CN=*.comss.one, h2, Let's Encrypt YR1, valid until 2026-12-17",
+        "replaced": ["92.223.109.31", "92.38.150.150"]
+      },
+      "note": "Проверка 2026-10-12 через --bootstrap: все три адреса прошли TLS по имени и DoH для обоих доменов Google. Они заменили прежние закреплённые адреса, которые 2026-10-11 не принимали соединения. Если ни один закреплённый адрес не проходит проверку, адреса ищутся заново при подключении."
+    },
+    {
+      "id": "geohide.ru", "slot": "P4", "aliases": ["geohide"],
+      "template": "https://geohide.ru/dns-query",
+      "servers": ["193.233.112.67", "193.233.112.68", "193.233.112.88"],
+      "origin": "bootstrap 2026-10-11",
+      "bootstrap": {
+        "date": "2026-10-11",
+        "resolved": ["159.194.200.33", "193.233.112.67", "193.233.112.68", "193.233.112.88", "37.230.192.51", "46.8.158.6"],
+        "crossCheck": "system resolver, 1.1.1.1, 8.8.8.8 and 9.9.9.9 returned the same six addresses",
+        "pinned": ["193.233.112.67", "193.233.112.68", "193.233.112.88"],
+        "excluded": [
+          { "ip": "46.8.158.6", "reason": "TCP/TLS handshake timeout (6 s) on every attempt" },
+          { "ip": "159.194.200.33", "reason": "intermittent: DoH endpoint and Google proxy handshake timed out in 3 of 4 checks" },
+          { "ip": "37.230.192.51", "reason": "valid but 1.1-2.9 s TLS handshake; excluded to keep latency predictable" }
+        ],
+        "tls": "CN=geohide.ru, h2, valid until 2027-01-05"
+      },
+      "note": "Ответы для доменов Google чередуются между четырьмя адресами прокси. В проверках 2026-10-11 один из них (159.194.200.33) не отвечал, поэтому иногда соединению нужен запасной адрес."
+    },
+    {
+      "id": "dns.dns-ai.ru", "slot": "P5", "aliases": ["dns-ai"],
+      "template": "https://dns.dns-ai.ru/dns-query",
+      "servers": ["186.246.48.217", "192.144.59.14", "186.246.49.127"],
+      "origin": "bootstrap 2026-10-11",
+      "bootstrap": {
+        "date": "2026-10-11",
+        "resolved": ["186.246.48.217", "192.144.59.14", "186.246.49.127"],
+        "crossCheck": "system resolver, 1.1.1.1, 8.8.8.8 and 9.9.9.9 returned the same three addresses",
+        "pinned": ["186.246.48.217", "192.144.59.14", "186.246.49.127"],
+        "excluded": [],
+        "tls": "CN=dns-ai.ru, h2, valid until 2026-11-28 .. 2027-01-03"
+      },
+      "experimental": true,
+      "knownIssue": "2026-10-11 провайдер отвечал по DoH, но адрес прокси для обоих доменов Google (191.44.41.79) не прошёл TLS из тестовой сети, поэтому проверка перед подключением там отказывает. Проверьте на своей сети через «Замер»."
+    },
+    {
+      "id": "dns.bezmezhau.com", "slot": "P6", "aliases": ["bezmezhau"],
+      "template": "https://dns.bezmezhau.com/dns-query",
+      "servers": ["143.20.64.55"],
+      "origin": "bootstrap 2026-10-11",
+      "bootstrap": {
+        "date": "2026-10-11",
+        "resolved": ["143.20.64.55"],
+        "crossCheck": "system resolver, 1.1.1.1, 8.8.8.8 and 9.9.9.9 returned the same address",
+        "pinned": ["143.20.64.55"],
+        "excluded": [],
+        "tls": "CN=dns.bezmezhau.com, h2, valid until 2026-11-24"
+      },
+      "note": "Заявлен как DoT: порт 853 открыт, но DoH по RFC 8484 тоже отвечает на 443 по пути /dns-query (найден пробой, в документации провайдера его нет) и прошёл проверку для обоих доменов Google."
+    }
+  ],
+  "pending": [
+    {
+      "id": "dns.astracat.ru",
+      "template": "https://dns.astracat.ru:8443/dns-query",
+      "resolved": ["135.106.217.200"],
+      "reason": "Not pinned. On 2026-10-11 TCP port 8443 on 135.106.217.200 was reset by the remote side before TLS (ports 4443 behaved the same), 443 answers HTTP 403 for DoH and 853 is DoT. Re-run `--bootstrap https://dns.astracat.ru:8443/dns-query` from another network and move the entry into profiles once it reports a pinned address. The probe and the DoH registration path accept a non-443 port."
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+name: Предложение / Feature request
+description: Конкретный сценарий, который приложение пока не решает.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Задача / Use case
+      description: Что хотите сделать и что сейчас мешает? Русский или English.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Предложение / Proposed behavior
+      description: Ожидаемое поведение и, при наличии, альтернативы.
+    validations:
+      required: true
