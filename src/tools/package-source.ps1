@@ -6,7 +6,7 @@ if(-not $OutputPath){$OutputPath=Join-Path $repo 'source code.zip'}
 $OutputPath=[IO.Path]::GetFullPath($OutputPath)
 
 $files=@(Get-Item -LiteralPath (Join-Path $repo 'README.md'),(Join-Path $repo '.gitignore'))
-foreach($name in 'LICENSE','.gitattributes'){
+foreach($name in 'LICENSE','.gitattributes','global.json','SECURITY.md','CHANGELOG.md','CONTRIBUTING.md'){
  $path=Join-Path $repo $name
  if(Test-Path -LiteralPath $path){$files+=Get-Item -LiteralPath $path}
 }

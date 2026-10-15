@@ -5,7 +5,7 @@
 **DNS-мост для Antigravity, Gemini Desktop и сервисов Google в Windows.**
 
 [![Windows x64](https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square)](#установка)
-[![C# · WinForms](https://img.shields.io/badge/C%23-WinForms-512BD4?style=flat-square)](docs/BUILDING.md)
+[![CI](https://github.com/narechiyaprincess/Antigravity-DNS/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/narechiyaprincess/Antigravity-DNS/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/github/license/narechiyaprincess/Antigravity-DNS?style=flat-square)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/narechiyaprincess/Antigravity-DNS?style=flat-square)](https://github.com/narechiyaprincess/Antigravity-DNS/releases/latest)
 
@@ -53,9 +53,13 @@ Antigravity DNS не является VPN и не туннелирует вес�
 - Secure DNS браузера и VPN/TUN могут обходить системный резолвер. Настройки браузера приложение не меняет.
 - [Домены, безопасность, локальные данные и диагностика](docs/TECHNICAL.md). Перед отправкой отчёта поддержки проверьте предпросмотр.
 
+Если мост или отдельный сервис не работает — [решение проблем](docs/TROUBLESHOOTING.md). О возможной уязвимости сообщайте по [SECURITY.md](SECURITY.md), без публикации деталей в Issues.
+
 ## Для разработчиков
 
 C# WinForms и PowerShell; каталог провайдеров и движок встроены в EXE. Исходники, offline-тесты и инструменты находятся в `src/`. Команды сборки, проверки и ограничения упаковки — в [BUILDING.md](docs/BUILDING.md).
+
+[Участие в разработке](CONTRIBUTING.md) · [История изменений](CHANGELOG.md) · [Подготовка выпуска](docs/RELEASING.md). CI проверяет сборку, self-test, встроенные скрипты, тесты движка на mock-данных и offline tier 14; полный локальный прогон и live-проверки описаны отдельно.
 
 ## Лицензия и ссылки
 

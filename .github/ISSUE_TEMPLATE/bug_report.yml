@@ -6,6 +6,7 @@ body:
     attributes:
       value: |
         Опишите проблему на русском или английском. Не публикуйте токены, приватные DoH URL, сырые настройки и журналы. Отчёт поддержки сначала проверьте в предпросмотре.
+        Возможная уязвимость / Suspected vulnerability: сначала прочитайте [SECURITY.md](https://github.com/narechiyaprincess/Antigravity-DNS/security/policy), не раскрывайте детали в этом issue.
   - type: input
     id: environment
     attributes:

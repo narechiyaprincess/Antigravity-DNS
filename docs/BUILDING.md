@@ -7,11 +7,23 @@ Commands below run from the repository root in PowerShell. They build and check 
 ## Prerequisites
 
 - Windows x64, an interactive desktop for UI checks, Windows PowerShell 5.1 (`powershell.exe`).
-- [.NET SDK 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0). Check with `dotnet --info`.
+- [.NET SDK 10.0.401](https://dotnet.microsoft.com/en-us/download/dotnet/10.0), exactly as pinned in [global.json](../global.json). Check with `dotnet --version` from the repository root. A different installed version does not satisfy the pin.
 - NuGet access for the first restore of runtime, linker, and ReadyToRun build packs. There are no third-party `PackageReference` entries.
 - At least 10 GiB free on the source and build-temp drives, enforced by `Build.ps1`.
 
 Python is optional and is only used by `src/tools/mutate.py`; the application, build, and normal verification do not need it.
+
+## Hosted CI
+
+The [CI workflow](../.github/workflows/ci.yml) runs on pushes to `main`, pull requests, and manual dispatch. It uses `windows-2025`, Windows PowerShell 5.1, and the pinned SDK. Run the same technical gate locally:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\tools\verify-ci.ps1
+```
+
+It invokes the existing build, `--version`, `--self-test`, `--verify-scripts`, `Engine.Tests.ps1` with a disposable scratch path, and offline runner `-Tier 14`, checking exit codes, success markers, version agreement, and the host-state receipt. The build performs NuGet restore. Self-tests use synthetic responses, temporary files, loopback networking, and disposable test registry keys. Embedded-script verification stages resources in the local application cache. Engine tests mock policy changes but still enumerate local adapters through read-only CIM; their scratch data stays in `src/.work/engine-ci-<id>/`. No public provider is required by these tests, and no live DNS mutation or UAC operation is invoked.
+
+This is a technical gate, not the full local suite. `Current` includes tier 6's fake-CIM seam, which `Engine.ps1` deliberately ignores in an elevated process; hosted Windows jobs must not assume an unelevated token. Full UI/DPI checks also require a desktop. CI therefore runs tier 14 only; run the full wrapper below on a **non-elevated interactive desktop**. Do not weaken the production privilege guard to accommodate CI. Hosted logs are retained for 7 days; local CI logs are under `src/.work/logs/ci/`.
 
 ## Build
 
@@ -91,6 +103,6 @@ To package the source:
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\src\tools\package-source.ps1
 ```
 
-This creates an ignored `source code.zip` with source, tests, documentation, license, repository templates and screenshots. Build output, logs, executables and debug symbols are excluded.
+This creates an ignored `source code.zip` with source, tests, documentation, license, SDK pin, repository guidance, workflows, templates and screenshots. Build output, logs, executables and debug symbols are excluded.
 
-For a public single-file asset, copy the verified EXE to an external release staging folder as `Antigravity-DNS-v1.0.0-win-x64.exe`, generate `SHA256SUMS.txt` with `Get-FileHash`, and keep release notes beside it. Do not commit executable files, generated ZIPs, or signing material. Publishing a tag/release and uploading assets are separate maintainer actions.
+For a public single-file asset, copy the verified EXE to an external release staging folder as `Antigravity-DNS-v<version>-win-x64.exe`, generate `SHA256SUMS.txt` with `Get-FileHash`, and keep release notes beside it. The [tag-build workflow and manual publication steps](RELEASING.md) prepare the same asset naming scheme without publishing a GitHub Release. Do not commit executable files, generated ZIPs, or signing material. Publishing a tag/release and uploading assets are separate maintainer actions.

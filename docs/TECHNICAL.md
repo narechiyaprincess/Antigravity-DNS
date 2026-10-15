@@ -2,7 +2,7 @@
 
 # Технические детали
 
-[На главную](../README.md) · [Сборка и проверки](BUILDING.md)
+[На главную](../README.md) · [Сборка и проверки](BUILDING.md) · [Решение проблем](TROUBLESHOOTING.md) · [Security policy](../SECURITY.md)
 
 ## Требования
 

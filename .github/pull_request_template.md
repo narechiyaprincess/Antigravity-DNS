@@ -2,6 +2,8 @@
 
 Какую проблему решает PR и что изменится для пользователя?
 
+Рекомендации и команды: [CONTRIBUTING.md](https://github.com/narechiyaprincess/Antigravity-DNS/blob/main/CONTRIBUTING.md).
+
 ## Проверка / Verification
 
 Команды и результат. Для изменений GUI приложите снимок; для DNS-движка укажите offline tier и проверку восстановления. Отдельно отметьте непроверенные сценарии.

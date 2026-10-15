@@ -5,7 +5,7 @@
 **A Windows DNS bridge for Antigravity, Gemini Desktop, and Google services.**
 
 [![Windows x64](https://img.shields.io/badge/Windows-x64-0078D4?style=flat-square)](#installation)
-[![C# · WinForms](https://img.shields.io/badge/C%23-WinForms-512BD4?style=flat-square)](../BUILDING.md)
+[![CI](https://github.com/narechiyaprincess/Antigravity-DNS/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/narechiyaprincess/Antigravity-DNS/actions/workflows/ci.yml)
 [![MIT](https://img.shields.io/github/license/narechiyaprincess/Antigravity-DNS?style=flat-square)](../../LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/narechiyaprincess/Antigravity-DNS?style=flat-square)](https://github.com/narechiyaprincess/Antigravity-DNS/releases/latest)
 
@@ -53,9 +53,13 @@ Open **Test → Measure**, then choose **Pick the best** or select a profile man
 - Browser Secure DNS and VPN/TUN routing can bypass the system resolver. The app does not rewrite browser settings.
 - See [domains, security, local data, and troubleshooting](TECHNICAL.md). Review the support-report preview before sharing it.
 
+If the bridge or a service fails, see [Troubleshooting](TROUBLESHOOTING.md). Follow [SECURITY.md](../../SECURITY.md) for suspected vulnerabilities without posting public details.
+
 ## Development
 
 C# WinForms and PowerShell, with the provider catalog and engine embedded in the EXE. Application source, offline tests, and tooling live in `src/`. See [BUILDING.md](../BUILDING.md) for build and verification commands and packaging limitations.
+
+[Contributing](../../CONTRIBUTING.md) · [Changelog](../../CHANGELOG.md) · [Release preparation](../RELEASING.md). CI checks the build, self-test, embedded scripts, mocked engine tests, and offline tier 14; full local verification and live checks are documented separately.
 
 ## License and links
 

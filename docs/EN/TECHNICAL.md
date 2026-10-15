@@ -2,7 +2,7 @@
 
 # Technical details
 
-[Back to the project](README.md) · [Build and verification](../BUILDING.md)
+[Back to the project](README.md) · [Build and verification](../BUILDING.md) · [Troubleshooting](TROUBLESHOOTING.md) · [Security policy](../../SECURITY.md)
 
 ## Requirements
 

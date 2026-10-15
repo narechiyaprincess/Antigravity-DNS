@@ -102,7 +102,8 @@ $script:FakeDoh[0].AllowFallbackToUdp=$true
 Check ((Get-Status).Code -eq 'DOH_REGISTRATION_CONFLICT') 'UDP downgrade detected by status'
 Reset-Mocks;Enable-State $true $false | Out-Null
 $s=Read-State;$s.Phase='Applying';$s.Doh[0].Ownership='Pending';Save-State $s
-Reject {Restore-State (Read-State)} 'DOH_OWNERSHIP_UNCERTAIN' 'ambiguous registration never claimed from intent'
+$script:FakeDoh[0].AllowFallbackToUdp=$true
+Reject {Restore-State (Read-State)} 'DOH_OWNERSHIP_UNCERTAIN' 'mismatched pending registration requires administrator review'
 Check ($script:FakeRules.Count -eq 0 -and $script:FakeDoh.Count -eq 1) 'ambiguous DoH retained; confirmed own settings removed'
 Reset-Mocks;Enable-State $true $false | Out-Null
 $s=Read-State;$s.Phase='Applying';$s.Doh[0].Ownership='Planned';Save-State $s
